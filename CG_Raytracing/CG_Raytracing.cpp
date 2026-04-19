@@ -43,6 +43,11 @@ int main() {
 	auto version_string = glewGetString(GLEW_VERSION);
 	std::println(std::cout, "GLEW  version {}", (const char*)version_string);
 
+	int32_t major{}, minor{};
+	glGetIntegerv(GL_MAJOR_VERSION, &major);
+	glGetIntegerv(GL_MINOR_VERSION, &minor);
+	std::println(std::cout, "OpenGL {}.{}", major, minor);
+
 	bool close = false;
 	while (!close) {
 		SDL_Event ev{};
