@@ -55,7 +55,58 @@ namespace cg_raytracing {
 		m_enable_scissor = _scissor;
 	}
 
+	void GLContextWrapper::BindBuffer(uint32_t _target, uint32_t _buf_id) {
+		if (!m_bound_buffers.contains(_target)) {
+			m_bound_buffers[_target] = _buf_id;
+			glBindBuffer(_target, _buf_id);
+			return;
+		}
+
+		if (m_bound_buffers[_target] == _buf_id) {
+			return;
+		}
+
+		glBindBuffer(_target, _buf_id);
+		m_bound_buffers[_target] = _buf_id;
+	}
+
+	void GLContextWrapper::BindVao(uint32_t _vao) {
+		if (m_bound_vao == _vao) {
+			return;
+		}
+
+		glBindVertexArray(_vao);
+		m_bound_vao = _vao;
+	}
+
 	GLContextWrapper* GetCurrentGLContext() {
 		return g_curr_ctx;
+	}
+
+	GLError ConvertGLErrorToEnum(uint32_t _err) {
+		switch (_err)
+		{
+		case GL_NO_ERROR:
+			return GLError::OK;
+		case GL_INVALID_ENUM:
+			return GLError::INVALID_ENUM;
+		case GL_INVALID_VALUE:
+			return GLError::INVALID_VALUE;
+		case GL_INVALID_OPERATION:
+			return GLError::INVALID_OPERATION;
+		case GL_INVALID_FRAMEBUFFER_OPERATION:
+			return GLError::INVALID_FRAMEBUFFER_OPERATION;
+		case GL_OUT_OF_MEMORY:
+			return GLError::OUT_OF_MEMORY;
+		case GL_STACK_OVERFLOW:
+			return GLError::STACK_OVERFLOW;
+		case GL_STACK_UNDERFLOW:
+			return GLError::STACK_UNDERFLOW;
+		default:
+			return GLError::UNKNOWN;
+		}
+
+		common::Unreachable();
+		return GLError::OK;
 	}
 }

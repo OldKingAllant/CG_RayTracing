@@ -8,6 +8,7 @@
 
 #include <Shader.hpp>
 #include <GLContext.hpp>
+#include <VertexBuffer.hpp>
 
 #include <format>
 #include <iostream>
@@ -24,6 +25,18 @@ void __stdcall DebugCallback(GLenum source,
 	std::string msg{ message, (size_t)length };
 	std::println(std::cout, "{}", message);
 }
+
+struct InstanceOffset {
+#pragma pack(push, 1)
+	int32_t offset;
+#pragma pack(pop)
+
+	std::vector<cg_raytracing::VertexAttribute> attributes() const {
+		return {
+			cg_raytracing::VertexAttribute{ cg_raytracing::VertexAttributeType::INT, (char*)&offset - (char*)this }
+		};
+	}
+};
 
 int main() {
 	if (!SDL_Init(SDL_INIT_VIDEO)) {
@@ -88,6 +101,15 @@ int main() {
 	glEnable(GL_DEBUG_OUTPUT);
 	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 	glDebugMessageCallback(DebugCallback, nullptr);
+
+	auto vert_buf = cg_raytracing::VertexBuffer::CreateVertexBuffer().value();
+	vert_buf.AddBuffer<cg_raytracing::Vertex2D>(0, 1);
+	vert_buf.AddBuffer<InstanceOffset>(1, 16);
+
+	vert_buf.PushVertexDataTyped(0, cg_raytracing::Vertex2D{});
+	vert_buf.PushVertexDataTyped(0, cg_raytracing::Vertex2D{});
+
+	vert_buf.Bind();
 
 	bool close = false;
 	while (!close) {
