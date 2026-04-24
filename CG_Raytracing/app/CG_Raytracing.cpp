@@ -127,6 +127,8 @@ int main() {
 	}
 
 	vert_buf.Bind();
+	index_buf.Bind();
+	shader.Bind();
 
 	bool close = false;
 	while (!close) {
@@ -146,10 +148,9 @@ int main() {
 		glClearColor(1.f, 1.f, 1.f, 1.f);
 		glClearDepth(1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		shader.Bind();
-		//This will cause GL_INVALID_OPERATION since
-		//no VAO is bound
-		glDrawArrays(GL_TRIANGLES, 0, 6);
+		
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (const void*)0);
+		//glDrawArrays(GL_TRIANGLES, 0, 6);
 
 		auto sync = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
 
