@@ -62,6 +62,14 @@ namespace cg_raytracing {
 		return tex2d;
 	}
 
+	std::expected<std::shared_ptr<Texture2D>, GLError> Texture2D::CreateSharedTexture(uint32_t _mip_levels, uint32_t _w, uint32_t _h, TextureFormat _format) {
+		auto tex_or_err = CreateTexture(_mip_levels, _w, _h, _format);
+		if (!tex_or_err.has_value()) {
+			return std::unexpected{ tex_or_err.error() };
+		}
+		return std::make_shared<Texture2D>(std::move(tex_or_err.value()));
+	}
+
 	std::expected<Texture2D, GLError> Texture2D::Clone() const {
 		auto maybe_new_texture = CreateTexture(m_mipmap_levels, m_width, m_height, m_format);
 		if (!maybe_new_texture.has_value()) {

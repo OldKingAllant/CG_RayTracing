@@ -1,14 +1,16 @@
 #pragma once
 
+#include <TextureBase.hpp>
 #include <GLContext.hpp>
 #include <TextureFormats.hpp>
 #include <SamplerParams.hpp>
 
 #include <expected>
 #include <optional>
+#include <memory>
 
 namespace cg_raytracing {
-	class Texture2D {
+	class Texture2D : public TextureBase {
 	public :
 		Texture2D(Texture2D&& _prev) noexcept;
 
@@ -23,6 +25,17 @@ namespace cg_raytracing {
 		/// <param name="_format">Texture format</param>
 		/// <returns>Texture or error</returns>
 		static std::expected<Texture2D, GLError> CreateTexture(uint32_t _mip_levels, uint32_t _w, uint32_t _h, TextureFormat _format);
+
+		/// <summary>
+		/// Utility method: same as CreateTexture but texture is wrapped
+		/// in a shared_ptr
+		/// </summary>
+		/// <param name="_mip_levels"></param>
+		/// <param name="_w"></param>
+		/// <param name="_h"></param>
+		/// <param name="_format"></param>
+		/// <returns></returns>
+		static std::expected<std::shared_ptr<Texture2D>, GLError> CreateSharedTexture(uint32_t _mip_levels, uint32_t _w, uint32_t _h, TextureFormat _format);
 
 		/// <summary>
 		/// Clone this texture (e.g. create a new handle and
@@ -53,7 +66,7 @@ namespace cg_raytracing {
 		std::optional<GLError> SetDownscaleFilter(SamplerFilter _filter);
 		std::optional<GLError> SetUpscaleFilter(SamplerFilter _filter);
 
-		~Texture2D();
+		~Texture2D() override;
 
 		/// <summary>
 		/// Bind this texture to a normal texture
