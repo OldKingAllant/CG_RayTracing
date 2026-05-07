@@ -2,6 +2,7 @@
 //
 
 #include "CG_Raytracing.h"
+#include "camera.hpp"
 
 #include <GL/glew.h>
 #include <SDL3/SDL.h>
@@ -11,6 +12,8 @@
 #include <Shader.hpp>
 #include <Texture2D.hpp>
 #include <VertexBuffer.hpp>
+
+#include <camera.hpp>
 
 #include <bit>
 #include <ctime>
@@ -49,6 +52,7 @@ struct Vertex2D {
 };
 
 int main() {
+    Camera my_camera = Camera();
     if (!SDL_Init(SDL_INIT_VIDEO)) {
         std::println(std::cout, "SDL_Init error: {}", SDL_GetError());
         std::exit(1);
