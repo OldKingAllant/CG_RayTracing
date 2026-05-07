@@ -1,1 +1,0 @@
-/usr/bin/c++ -Wl,--dependency-file=CMakeFiles/CG_Raytracing.dir/link.d CMakeFiles/CG_Raytracing.dir/CG_Raytracing.cpp.o -o ../../bin/CG_Raytracing  /usr/lib/libSDL3.so.0.4.8 /usr/lib/libGLEW.so ../../bin/libRaytracingEngine.a ../../bin/libcommon.a /usr/lib/libGLX.so /usr/lib/libOpenGL.so /usr/lib/libGLEW.so /usr/lib/libGLX.so /usr/lib/libOpenGL.so
