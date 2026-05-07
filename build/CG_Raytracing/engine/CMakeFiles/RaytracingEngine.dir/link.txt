@@ -1,0 +1,2 @@
+/usr/bin/ar qc ../../bin/libRaytracingEngine.a CMakeFiles/RaytracingEngine.dir/src/Shader.cpp.o CMakeFiles/RaytracingEngine.dir/src/GLContext.cpp.o CMakeFiles/RaytracingEngine.dir/src/GpuBuffer.cpp.o CMakeFiles/RaytracingEngine.dir/src/VertexBuffer.cpp.o CMakeFiles/RaytracingEngine.dir/src/IndexBuffer.cpp.o CMakeFiles/RaytracingEngine.dir/src/Texture2D.cpp.o CMakeFiles/RaytracingEngine.dir/src/TextureFormats.cpp.o CMakeFiles/RaytracingEngine.dir/src/SamplerParams.cpp.o CMakeFiles/RaytracingEngine.dir/src/FrameBuffer.cpp.o
+/usr/bin/ranlib ../../bin/libRaytracingEngine.a

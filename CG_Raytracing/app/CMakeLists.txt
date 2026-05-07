@@ -3,6 +3,14 @@
 add_executable (CG_Raytracing "CG_Raytracing.cpp" "CG_Raytracing.h")
 set_property(TARGET CG_Raytracing PROPERTY CXX_STANDARD 23)
 
+add_custom_command(TARGET CG_Raytracing POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E make_directory
+        $<TARGET_FILE_DIR:CG_Raytracing>/assets
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_SOURCE_DIR}/assets
+        $<TARGET_FILE_DIR:CG_Raytracing>/assets
+)
+
 if(WIN32)
 	FetchContent_Declare(
 		SDL3

@@ -1,0 +1,11 @@
+{
+	"InstallScripts" : 
+	[
+		"/home/filippoa/Desktop/university/magistrale/1_2/computer_graphics/CG_RayTracing.git/main/build/cmake_install.cmake",
+		"/home/filippoa/Desktop/university/magistrale/1_2/computer_graphics/CG_RayTracing.git/main/build/CG_Raytracing/cmake_install.cmake",
+		"/home/filippoa/Desktop/university/magistrale/1_2/computer_graphics/CG_RayTracing.git/main/build/CG_Raytracing/app/cmake_install.cmake",
+		"/home/filippoa/Desktop/university/magistrale/1_2/computer_graphics/CG_RayTracing.git/main/build/CG_Raytracing/engine/cmake_install.cmake",
+		"/home/filippoa/Desktop/university/magistrale/1_2/computer_graphics/CG_RayTracing.git/main/build/CG_Raytracing/common/cmake_install.cmake"
+	],
+	"Parallel" : false
+}

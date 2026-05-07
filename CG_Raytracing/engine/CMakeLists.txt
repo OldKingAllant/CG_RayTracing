@@ -29,6 +29,8 @@ target_include_directories(RaytracingEngine PUBLIC "./include")
 if(WIN32)
 	target_link_libraries(RaytracingEngine PUBLIC libglew_shared)
 elseif(UNIX)
+    find_package(GLEW REQUIRED)
+    find_package(OpenGL REQUIRED)
 	target_link_libraries(RaytracingEngine PRIVATE 
         GLEW::GLEW 
         OpenGL::GL

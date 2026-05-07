@@ -2,6 +2,7 @@
 
 #include <GLError.hpp>
 
+#include <cstdint>
 #include <expected>
 
 namespace cg_raytracing {

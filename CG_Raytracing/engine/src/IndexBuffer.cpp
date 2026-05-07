@@ -1,6 +1,7 @@
 #include <IndexBuffer.hpp>
 
 #include <GL/glew.h>
+#include <algorithm>
 
 namespace cg_raytracing {
 	IndexBuffer::IndexBuffer() :

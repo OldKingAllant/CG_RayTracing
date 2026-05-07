@@ -3,13 +3,14 @@
 
 #include <GL/glew.h>
 #include <typeinfo>
+#include <algorithm>
 
 namespace cg_raytracing {
 	namespace detail {
 		std::expected<uint32_t, GLError> CreateVertexArrayObject() {
 			uint32_t vao{};
 			glGenVertexArrays(1, &vao);
-
+                
 			if (0 == vao) {
 				auto maybe_err = ConvertGLErrorToEnum(glGetError());
 				return std::unexpected{ maybe_err };
@@ -78,6 +79,7 @@ namespace cg_raytracing {
 		}
 
 		uint32_t SetVertexAttributes(std::vector<VertexAttribute> const& _attributes, 
+
 			uint32_t _instance_step_count,
 			uint32_t _vert_size_bytes,
 			uint32_t _base_index) {

@@ -6,6 +6,9 @@
 #include <fstream>
 
 #include <GL/glew.h>
+#include <print>
+
+#include <iostream>
 
 namespace cg_raytracing {
 	using ShaderStage = Shader::ShaderStage;
@@ -76,6 +79,7 @@ namespace cg_raytracing {
 	}
 
 	std::expected<Shader, std::string> Shader::CreateShaderFromFiles(std::vector<std::pair<fs::path, ShaderStage>> const& _stages) {
+        // print the shader paths
 		std::vector<std::pair<std::string, ShaderStage>> shader_sources{};
 		for (auto const& [path, stage] : _stages) {
 			if (!std::filesystem::exists(path)) {

@@ -2,4 +2,6 @@
 out/*
 CMakePresets.json
 CMakeSettings.json
-build-dir/*
+build/*
+compile_commands.json
+.clang_format
