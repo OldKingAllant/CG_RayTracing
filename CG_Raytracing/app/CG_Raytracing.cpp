@@ -3,6 +3,7 @@
 
 #include "CG_Raytracing.h"
 #include "camera.hpp"
+#include "config.hpp"
 
 #include <GL/glew.h>
 #include <SDL3/SDL.h>
@@ -183,7 +184,7 @@ int main() {
     srand(time(0));
 
     auto tex = cg_raytracing::Texture2D::CreateTexture(
-                   1, 640, 480, cg_raytracing::TextureFormat::RGB8)
+                   1, Config::IMAGE_HEIGHT, Config::IMAGE_WIDTH, cg_raytracing::TextureFormat::RGB8)
                    .value();
     tex.SetUpscaleFilter(cg_raytracing::SamplerFilter::LINEAR);
     tex.SetDownscaleFilter(cg_raytracing::SamplerFilter::LINEAR);

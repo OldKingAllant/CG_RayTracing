@@ -40,6 +40,14 @@ Vec3 &Vec3::operator/=(const float _scalar) {
     return *this *= 1 / _scalar;
 };
 
+Vec3 &Vec3::operator=(const Vec3 &_other) {
+    this->x = _other.x;
+    this->y = _other.y;
+    this->z = _other.z;
+
+    return *this;
+}
+
 double Vec3::DotProduct(const Vec3 &_other) const {
     return this->x * _other.x + this->y * _other.y + this->z * _other.z;
 }
