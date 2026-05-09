@@ -2,7 +2,7 @@
 
 #include <cstdint>
 namespace Config {
-inline constexpr double ASPECT_RATIO = 16.0 / 9.0;
+inline constexpr float ASPECT_RATIO = 16.0 / 9.0;
 inline constexpr uint32_t IMAGE_WIDTH = 400;
 inline constexpr uint32_t IMAGE_HEIGHT =
     static_cast<uint32_t>(IMAGE_WIDTH / ASPECT_RATIO);
