@@ -1,6 +1,7 @@
 #pragma once
 
 #include "config.hpp"
+#include "vec3.hpp"
 #include <cstdint>
 #include <iostream>
 
@@ -13,14 +14,14 @@ class Camera {
            const float *_position = Config::CAMERA_POSITION,
            const float *_direction = Config::CAMERA_DIRECTION)
         : m_sensor_size_width(_sensor_size_width),
-          m_focal_length(_focal_length), m_width(_width), m_height(_height) {
-        std::copy(_position, _position + 3, m_position);
-        std::copy(_direction, _direction + 3, m_direction);
-    }
+          m_focal_length(_focal_length), m_width(_width), m_height(_height),
+          m_position(_position[0], _position[1], _position[2]),
+          m_direction(_direction[0], _direction[1], _direction[2]) {}
+
     uint32_t m_sensor_size_width;
     uint32_t m_focal_length;
     uint32_t m_width;
     uint32_t m_height;
-    float m_position[3];
-    float m_direction[3];
+    cg_raytracing::math::Vec3 m_position;
+    cg_raytracing::math::Vec3 m_direction;
 };
