@@ -2,8 +2,9 @@
 //
 
 #include "CG_Raytracing.h"
-#include "camera.hpp"
-#include "config.hpp"
+
+#include <camera.hpp>
+#include <config.hpp>
 
 #include <GL/glew.h>
 #include <SDL3/SDL.h>
@@ -14,7 +15,7 @@
 #include <Texture2D.hpp>
 #include <VertexBuffer.hpp>
 
-#include <camera.hpp>
+
 
 #include <bit>
 #include <ctime>
@@ -22,6 +23,7 @@
 #include <format>
 #include <iostream>
 #include <print>
+#include <memory>
 
 void DebugCallback(GLenum source, GLenum type, GLuint id, GLenum severity,
                    GLsizei length, const GLchar *message,
@@ -53,7 +55,9 @@ struct Vertex2D {
 };
 
 int main() {
-    cg_raytracing::scene::Camera my_camera = cg_raytracing::scene::Camera();
+    using Camera = cg_raytracing::scene::Camera;
+    std::unique_ptr<Camera> my_camera = std::make_unique<Camera>();
+
     if (!SDL_Init(SDL_INIT_VIDEO)) {
         std::println(std::cout, "SDL_Init error: {}", SDL_GetError());
         std::exit(1);
@@ -197,9 +201,9 @@ int main() {
     //                    tex.GetHeight(), cg_raytracing::PixelFormat::RGB,
     //                    cg_raytracing::PixelDataType::UNSIGNED_BYTE);
 
-    my_camera.BurstRays();
+    my_camera->BurstRays();
 
-    tex.CopyFromBuffer(my_camera.m_img_buf.data(), 0, 0, 0, tex.GetWidth(),
+    tex.CopyFromBuffer(my_camera->m_img_buf.data(), 0, 0, 0, tex.GetWidth(),
                        tex.GetHeight(), cg_raytracing::PixelFormat::RGB,
                        cg_raytracing::PixelDataType::UNSIGNED_BYTE);
     tex.BindTexture(GL_TEXTURE_2D);
