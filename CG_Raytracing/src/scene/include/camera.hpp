@@ -1,6 +1,8 @@
 #pragma once
 
+#include "TextureFormats.hpp"
 #include "config.hpp"
+#include "ray.hpp"
 #include "vec3.hpp"
 #include <array>
 #include <cstdint>
@@ -16,10 +18,20 @@ class Camera {
     uint32_t m_focal_length;
     uint32_t m_image_width;
     uint32_t m_image_height;
-    std::array<uint8_t, Config::IMAGE_HEIGHT * Config::IMAGE_WIDTH> m_img_buf;
+
+    // hardcoded the size for RGB
+    std::array<uint8_t,
+               Config::IMAGE_HEIGHT * Config::IMAGE_WIDTH *static_cast<int>(
+                                          cg_raytracing::PixelFormat::RGB)>
+        m_img_buf;
 
     cg_raytracing::math::Vec3 m_position;
     cg_raytracing::math::Vec3 m_direction;
+
+    // create the rays for each pixel so not to compute them every time we need to render
+    std::array<cg_raytracing::math::Ray,
+               Config::IMAGE_HEIGHT * Config::IMAGE_WIDTH>
+        m_rays_matrix;
 
     // vector that connects the camera focal center to the top left corner.
     cg_raytracing::math::Vec3 m_top_left;

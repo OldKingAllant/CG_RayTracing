@@ -53,7 +53,7 @@ struct Vertex2D {
 };
 
 int main() {
-    Camera my_camera = Camera();
+    cg_raytracing::scene::Camera my_camera = cg_raytracing::scene::Camera();
     if (!SDL_Init(SDL_INIT_VIDEO)) {
         std::println(std::cout, "SDL_Init error: {}", SDL_GetError());
         std::exit(1);
@@ -188,12 +188,18 @@ int main() {
                    .value();
     tex.SetUpscaleFilter(cg_raytracing::SamplerFilter::LINEAR);
     tex.SetDownscaleFilter(cg_raytracing::SamplerFilter::LINEAR);
-    std::vector<uint8_t> temp_buf{};
-    temp_buf.resize(tex.GetSizeBytes());
-    for (auto &val : temp_buf) {
-        val = (uint8_t)(rand() % 256);
-    }
-    tex.CopyFromBuffer(temp_buf.data(), 0, 0, 0, tex.GetWidth(),
+    // std::vector<uint8_t> temp_buf{};
+    // temp_buf.resize(tex.GetSizeBytes());
+    // for (auto &val : temp_buf) {
+    //     val = (uint8_t)(rand() % 256);
+    // }
+    // tex.CopyFromBuffer(temp_buf.data(), 0, 0, 0, tex.GetWidth(),
+    //                    tex.GetHeight(), cg_raytracing::PixelFormat::RGB,
+    //                    cg_raytracing::PixelDataType::UNSIGNED_BYTE);
+
+    my_camera.BurstRays();
+
+    tex.CopyFromBuffer(my_camera.m_img_buf.data(), 0, 0, 0, tex.GetWidth(),
                        tex.GetHeight(), cg_raytracing::PixelFormat::RGB,
                        cg_raytracing::PixelDataType::UNSIGNED_BYTE);
     tex.BindTexture(GL_TEXTURE_2D);

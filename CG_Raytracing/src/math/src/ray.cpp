@@ -3,10 +3,16 @@
 
 using namespace cg_raytracing::math;
 
-Ray::Ray(Vec3 _origin, Vec3 _direction, Vec3 _color) {
-    this->m_color = _color;
-    this->m_direction = _direction;
+Ray::Ray(Vec3 _origin, Vec3 _direction) {
     this->m_origin = _origin;
+    this->m_direction = _direction;
+}
+
+void Ray::SetDirection(Vec3 &_other) {
+    this->m_direction = _other;
+}
+void Ray::SetOrigin(Vec3 &_other) {
+    this->m_origin = _other;
 }
 
 void Ray::Simulate() {
