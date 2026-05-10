@@ -13,10 +13,12 @@ if(WIN32)
         GIT_REPOSITORY https://github.com/catchorg/Catch2.git
         GIT_TAG v3.14.0
     )
+    FetchContent_MakeAvailable(Catch2)
 elseif(UNIX)
     find_package(Catch2 3 REQUIRED)
-    target_link_libraries(UnitTests PRIVATE Catch2::Catch2WithMain)
 endif()
+
+target_link_libraries(UnitTests PRIVATE Catch2::Catch2WithMain)
 
 include(CTest)
 include(Catch)
