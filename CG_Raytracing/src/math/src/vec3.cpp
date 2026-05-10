@@ -56,3 +56,25 @@ Vec3 Vec3::CrossProduct(const Vec3 &_other) const {
                 this->z * _other.x - this->x * _other.z,
                 this->x * _other.y - this->y * _other.x);
 }
+
+Vec3 Vec3::operator-(const Vec3 &_other) const {
+    return Vec3(this->x - _other.x, this->y - _other.y, this->z - _other.z);
+}
+
+float Vec3::dot(const Vec3 &_other) const {
+    return this->x * _other.x + this->y * _other.y + this->z * _other.z;
+}
+
+float Vec3::length_squared() const {
+    return this->x * this->x + this->y * this->y + this->z * this->z;
+}
+
+float Vec3::length() const {
+    return std::sqrt(length_squared());
+}
+
+Vec3 Vec3::normalized() const {
+    float len = length();
+    if (len == 0.0f) return Vec3(0, 0, 0);
+    return *this / len;
+}

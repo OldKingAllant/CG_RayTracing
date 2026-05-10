@@ -159,10 +159,10 @@ int main() {
     // X, Y and U, V
     // X, Y are in screen coordinates (in [-1.0, 1.0])
     // U, V are in texture coordinates (in [0.0, 1.0])
-    constexpr Vertex2D VERTICES[4] = {{-1.0, 1.0, 0.0, 1.0},
-                                      {1.0, 1.0, 1.0, 1.0},
-                                      {-1.0, -1.0, 0.0, 0.0},
-                                      {1.0, -1.0, 1.0, 0.0}};
+    constexpr Vertex2D VERTICES[4] = {{-1.0, 1.0, 0.0, 0.0},
+                                  {1.0, 1.0, 1.0, 0.0},
+                                  {-1.0, -1.0, 0.0, 1.0},
+                                  {1.0, -1.0, 1.0, 1.0}};
 
     // Indices in the vertex buffer to draw a quad
     constexpr float INDICES[6] = {0, 1, 2, 2, 1, 3};
@@ -198,6 +198,8 @@ int main() {
     //                    cg_raytracing::PixelDataType::UNSIGNED_BYTE);
 
     my_camera.BurstRays();
+
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
     tex.CopyFromBuffer(my_camera.m_img_buf.data(), 0, 0, 0, tex.GetWidth(),
                        tex.GetHeight(), cg_raytracing::PixelFormat::RGB,

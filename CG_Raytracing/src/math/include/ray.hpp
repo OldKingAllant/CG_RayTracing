@@ -1,5 +1,4 @@
 #pragma once
-
 #include "vec3.hpp"
 
 namespace cg_raytracing {
@@ -14,6 +13,10 @@ class Ray {
 
     void SetOrigin(Vec3 &_other);
     void SetDirection(Vec3 &_other);
+
+    // Punto lungo il raggio al parametro t
+    Vec3 at(float t) const { return m_origin + m_direction * t; }
+
     void Simulate();
 };
 } // namespace math
