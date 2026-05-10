@@ -20,15 +20,14 @@ class Camera {
     uint32_t m_image_height;
 
     // hardcoded the size for RGB
-    std::array<uint8_t,
-               Config::IMAGE_HEIGHT * Config::IMAGE_WIDTH *static_cast<int>(
-                                          cg_raytracing::PixelFormat::RGB)>
+    std::array<uint8_t, Config::IMAGE_HEIGHT * Config::IMAGE_WIDTH * 3>
         m_img_buf;
 
     cg_raytracing::math::Vec3 m_position;
     cg_raytracing::math::Vec3 m_direction;
 
-    // create the rays for each pixel so not to compute them every time we need to render
+    // create the rays for each pixel so not to compute them every time we need
+    // to render
     std::array<cg_raytracing::math::Ray,
                Config::IMAGE_HEIGHT * Config::IMAGE_WIDTH>
         m_rays_matrix;
