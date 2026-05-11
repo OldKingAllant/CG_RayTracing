@@ -11,8 +11,8 @@ class Ray {
 
     Ray(Vec3 _origin = Vec3(0, 0, 0), Vec3 _direction = Vec3(0, 0, 0));
 
-    void SetOrigin(Vec3 &_other);
-    void SetDirection(Vec3 &_other);
+    void SetOrigin(Vec3 const& _other);
+    void SetDirection(Vec3 const& _other);
 
     Vec3 At(float _t) const { return m_origin + m_direction * _t; }
 

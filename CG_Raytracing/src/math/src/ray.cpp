@@ -8,11 +8,11 @@ Ray::Ray(Vec3 _origin, Vec3 _direction) {
     this->m_direction = _direction;
 }
 
-void Ray::SetDirection(Vec3 &_other) {
+void Ray::SetDirection(Vec3 const& _other) {
     this->m_direction = _other;
 }
 
-void Ray::SetOrigin(Vec3 &_other) {
+void Ray::SetOrigin(Vec3 const& _other) {
     this->m_origin = _other;
 }
 
