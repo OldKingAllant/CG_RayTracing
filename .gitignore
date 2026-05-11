@@ -5,3 +5,4 @@ CMakeSettings.json
 build/*
 compile_commands.json
 .clang_format
+notes/*
