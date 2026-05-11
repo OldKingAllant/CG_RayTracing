@@ -2,7 +2,9 @@
 #include "ray.hpp"
 #include "vec3.hpp"
 #include "sphere.hpp"
+#include "cube.hpp"
 #include "material.hpp"
+#include "triangle.hpp"
 
 using namespace cg_raytracing::scene;
 
@@ -69,20 +71,38 @@ Camera::Camera(uint32_t _sensor_size_width, uint32_t _focal_length,
 }*/
 
 void Camera::BurstRays() {
+    // Define materials
+    geometry::Material mat_sphere = geometry::Material::Diffuse({0.8f, 0.2f, 0.2f});
+    geometry::Material mat_cube   = geometry::Material::Metal({0.9f, 0.1f, 0.1f}, 0.5f);
+
     geometry::Sphere sphere(
-    math::Vec3(0.0f, 0.0f, 200.0f),
-    30.0f,
-    geometry::Material::Diffuse({0.8f, 0.2f, 0.2f})
-);
+        math::Vec3(-40.0f, 0.0f, 200.0f),
+        30.0f,
+        mat_sphere
+    );
+
+    geometry::Cube cube(
+        math::Vec3(40.0f, 0.0f, 200.0f),
+        20.0f,
+        mat_cube
+    );
+
 
     int hit_count = 0;
-
     for (uint32_t y = 0; y < this->m_image_height; y++) {
         for (uint32_t x = 0; x < this->m_image_width; x++) {
             uint32_t base_idx = (y * this->m_image_width + x) * 3;
             const math::Ray &ray = this->m_rays_matrix[y * this->m_image_width + x];
-            
-            auto hit = sphere.Hit(ray);  // ← Hit maiuscolo
+
+            // Test both objects, keep the closest hit
+            auto hit_sphere = sphere.Hit(ray);
+            auto hit_cube   = cube.Hit(ray);
+
+            std::optional<geometry::HitRecord> hit;
+            if (hit_sphere && hit_cube)
+                hit = (hit_sphere->m_t < hit_cube->m_t) ? hit_sphere : hit_cube;
+            else if (hit_sphere) hit = hit_sphere;
+            else if (hit_cube)   hit = hit_cube;
 
             if (hit) {
                 hit_count++;
@@ -98,25 +118,16 @@ void Camera::BurstRays() {
         }
     }
 
-    std::println(std::cout, "Hit count: {}", hit_count);
-    std::println(std::cout, "Ray[center] direction: ({}, {}, {})",
-        m_rays_matrix[(m_image_height/2) * m_image_width + m_image_width/2].m_direction.x,
-        m_rays_matrix[(m_image_height/2) * m_image_width + m_image_width/2].m_direction.y,
-        m_rays_matrix[(m_image_height/2) * m_image_width + m_image_width/2].m_direction.z);
-    std::println(std::cout, "Ray[0] direction: ({}, {}, {})",
-        m_rays_matrix[0].m_direction.x,
-        m_rays_matrix[0].m_direction.y,
-        m_rays_matrix[0].m_direction.z);
-    std::println(std::cout, "Sensor width: {} height: {}", m_sensor_size_width, m_sensor_size_height);
-    std::println(std::cout, "Hit count: {}", hit_count);  // ← stampa quanti hit
-    
-    // Stampa il primo raggio per capire la direzione
-    std::println(std::cout, "Ray[0] origin:    ({}, {}, {})",
-        m_rays_matrix[0].m_origin.x,
-        m_rays_matrix[0].m_origin.y,
-        m_rays_matrix[0].m_origin.z);
-    std::println(std::cout, "Ray[0] direction: ({}, {}, {})",
-        m_rays_matrix[0].m_direction.x,
-        m_rays_matrix[0].m_direction.y,
-        m_rays_matrix[0].m_direction.z);
+    // Debug prints
+    int hit_sphere_count = 0, hit_cube_count = 0;
+    for (uint32_t y = 0; y < this->m_image_height; y++) {
+        for (uint32_t x = 0; x < this->m_image_width; x++) {
+            const math::Ray &ray = this->m_rays_matrix[y * this->m_image_width + x];
+            if (sphere.Hit(ray)) hit_sphere_count++;
+            if (cube.Hit(ray))   hit_cube_count++;
+        }
+    }
+    std::println(std::cout, "Total hits: {}", hit_count);
+    std::println(std::cout, "Sphere hits: {}", hit_sphere_count);
+    std::println(std::cout, "Cube hits: {}", hit_cube_count);
 }
