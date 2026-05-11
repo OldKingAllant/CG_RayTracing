@@ -6,7 +6,6 @@
 
 using namespace cg_raytracing::scene;
 
-// Il costruttore rimane invariato
 Camera::Camera(uint32_t _sensor_size_width, uint32_t _focal_length,
                uint32_t _image_width, uint32_t _image_height,
                const float *_position, const float *_direction)
@@ -19,7 +18,7 @@ Camera::Camera(uint32_t _sensor_size_width, uint32_t _focal_length,
 
     math::Vec3 top_left = math::Vec3(
         -1 * this->m_sensor_size_width / 2,
-        -1 * this->m_sensor_size_height / 2,  // ← dividi per 2
+        -1 * this->m_sensor_size_height / 2,
         _focal_length
     );
 
@@ -76,21 +75,20 @@ void Camera::BurstRays() {
     geometry::Material::Diffuse({0.8f, 0.2f, 0.2f})
 );
 
-    int hit_count = 0;  // ← conta i raggi che colpiscono
+    int hit_count = 0;
 
     for (uint32_t y = 0; y < this->m_image_height; y++) {
         for (uint32_t x = 0; x < this->m_image_width; x++) {
             uint32_t base_idx = (y * this->m_image_width + x) * 3;
             const math::Ray &ray = this->m_rays_matrix[y * this->m_image_width + x];
             
-            auto hit = sphere.hit(ray);
-        
+            auto hit = sphere.Hit(ray);  // ← Hit maiuscolo
 
             if (hit) {
                 hit_count++;
-                this->m_img_buf[base_idx]     = (uint8_t)((hit->normal.x + 1.0f) * 0.5f * 255);
-                this->m_img_buf[base_idx + 1] = (uint8_t)((hit->normal.y + 1.0f) * 0.5f * 255);
-                this->m_img_buf[base_idx + 2] = (uint8_t)((hit->normal.z + 1.0f) * 0.5f * 255);
+                this->m_img_buf[base_idx]     = (uint8_t)((hit->m_normal.x + 1.0f) * 0.5f * 255);
+                this->m_img_buf[base_idx + 1] = (uint8_t)((hit->m_normal.y + 1.0f) * 0.5f * 255);
+                this->m_img_buf[base_idx + 2] = (uint8_t)((hit->m_normal.z + 1.0f) * 0.5f * 255);
             } else {
                 float t = (float)y / this->m_image_height;
                 this->m_img_buf[base_idx]     = 0;
@@ -101,15 +99,15 @@ void Camera::BurstRays() {
     }
 
     std::println(std::cout, "Hit count: {}", hit_count);
-std::println(std::cout, "Ray[center] direction: ({}, {}, {})",
-    m_rays_matrix[(m_image_height/2) * m_image_width + m_image_width/2].m_direction.x,
-    m_rays_matrix[(m_image_height/2) * m_image_width + m_image_width/2].m_direction.y,
-    m_rays_matrix[(m_image_height/2) * m_image_width + m_image_width/2].m_direction.z);
-std::println(std::cout, "Ray[0] direction: ({}, {}, {})",
-    m_rays_matrix[0].m_direction.x,
-    m_rays_matrix[0].m_direction.y,
-    m_rays_matrix[0].m_direction.z);
-std::println(std::cout, "Sensor width: {} height: {}", m_sensor_size_width, m_sensor_size_height);
+    std::println(std::cout, "Ray[center] direction: ({}, {}, {})",
+        m_rays_matrix[(m_image_height/2) * m_image_width + m_image_width/2].m_direction.x,
+        m_rays_matrix[(m_image_height/2) * m_image_width + m_image_width/2].m_direction.y,
+        m_rays_matrix[(m_image_height/2) * m_image_width + m_image_width/2].m_direction.z);
+    std::println(std::cout, "Ray[0] direction: ({}, {}, {})",
+        m_rays_matrix[0].m_direction.x,
+        m_rays_matrix[0].m_direction.y,
+        m_rays_matrix[0].m_direction.z);
+    std::println(std::cout, "Sensor width: {} height: {}", m_sensor_size_width, m_sensor_size_height);
     std::println(std::cout, "Hit count: {}", hit_count);  // ← stampa quanti hit
     
     // Stampa il primo raggio per capire la direzione

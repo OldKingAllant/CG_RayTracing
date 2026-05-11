@@ -14,8 +14,7 @@ class Ray {
     void SetOrigin(Vec3 &_other);
     void SetDirection(Vec3 &_other);
 
-    // Punto lungo il raggio al parametro t
-    Vec3 at(float t) const { return m_origin + m_direction * t; }
+    Vec3 At(float _t) const { return m_origin + m_direction * _t; }
 
     void Simulate();
 };
