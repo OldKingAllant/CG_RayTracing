@@ -188,7 +188,7 @@ int main() {
     srand(time(0));
 
     auto tex = cg_raytracing::Texture2D::CreateTexture(
-                   1, Config::IMAGE_HEIGHT, Config::IMAGE_WIDTH, cg_raytracing::TextureFormat::RGB8)
+                   1, Config::IMAGE_WIDTH, Config::IMAGE_HEIGHT, cg_raytracing::TextureFormat::RGB8)
                    .value();
     tex.SetUpscaleFilter(cg_raytracing::SamplerFilter::LINEAR);
     tex.SetDownscaleFilter(cg_raytracing::SamplerFilter::LINEAR);
@@ -202,8 +202,6 @@ int main() {
     //                    cg_raytracing::PixelDataType::UNSIGNED_BYTE);
 
     my_camera->BurstRays();
-
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
     tex.CopyFromBuffer(my_camera->m_img_buf.data(), 0, 0, 0, tex.GetWidth(),
                        tex.GetHeight(), cg_raytracing::PixelFormat::RGB,
