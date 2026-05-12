@@ -2,7 +2,9 @@
 //
 
 #include "CG_Raytracing.h"
+#include "vec3.hpp"
 
+#include <SDL3/SDL_assert.h>
 #include <camera.hpp>
 #include <config.hpp>
 
@@ -15,15 +17,13 @@
 #include <Texture2D.hpp>
 #include <VertexBuffer.hpp>
 
-
-
 #include <bit>
 #include <ctime>
 #include <filesystem>
 #include <format>
 #include <iostream>
-#include <print>
 #include <memory>
+#include <print>
 
 void DebugCallback(GLenum source, GLenum type, GLuint id, GLenum severity,
                    GLsizei length, const GLchar *message,
@@ -53,6 +53,54 @@ struct Vertex2D {
                     (char *)&v - (char *)this}};
     }
 };
+
+// function to move the camera around. Probably in the future is better to move
+// this in another file and optimize it
+void HandleKeyDown(SDL_Event &_ev,
+                   std::unique_ptr<cg_raytracing::scene::Camera> &_my_camera,
+                   cg_raytracing::Texture2D &tex) {
+    SDL_assert(_ev.type == SDL_EVENT_KEY_DOWN);
+    switch (_ev.key.scancode) {
+    case SDL_SCANCODE_W:
+        _my_camera->Rotate(cg_raytracing::math::Vec3(0.02, 0.0, 0.0));
+        _my_camera->BurstRays();
+        tex.CopyFromBuffer(_my_camera->m_img_buf.data(), 0, 0, 0,
+                           tex.GetWidth(), tex.GetHeight(),
+                           cg_raytracing::PixelFormat::RGB,
+                           cg_raytracing::PixelDataType::UNSIGNED_BYTE);
+        tex.BindTexture(GL_TEXTURE_2D);
+        break;
+    case SDL_SCANCODE_A:
+        _my_camera->Rotate(cg_raytracing::math::Vec3(0.0, -0.02, 0.0));
+        _my_camera->BurstRays();
+        tex.CopyFromBuffer(_my_camera->m_img_buf.data(), 0, 0, 0,
+                           tex.GetWidth(), tex.GetHeight(),
+                           cg_raytracing::PixelFormat::RGB,
+                           cg_raytracing::PixelDataType::UNSIGNED_BYTE);
+        tex.BindTexture(GL_TEXTURE_2D);
+        break;
+    case SDL_SCANCODE_S:
+        _my_camera->Rotate(cg_raytracing::math::Vec3(-0.02, 0.0, 0.0));
+        _my_camera->BurstRays();
+        tex.CopyFromBuffer(_my_camera->m_img_buf.data(), 0, 0, 0,
+                           tex.GetWidth(), tex.GetHeight(),
+                           cg_raytracing::PixelFormat::RGB,
+                           cg_raytracing::PixelDataType::UNSIGNED_BYTE);
+        tex.BindTexture(GL_TEXTURE_2D);
+        break;
+    case SDL_SCANCODE_D:
+        _my_camera->Rotate(cg_raytracing::math::Vec3(0.0, 0.02, 0.0));
+        _my_camera->BurstRays();
+        tex.CopyFromBuffer(_my_camera->m_img_buf.data(), 0, 0, 0,
+                           tex.GetWidth(), tex.GetHeight(),
+                           cg_raytracing::PixelFormat::RGB,
+                           cg_raytracing::PixelDataType::UNSIGNED_BYTE);
+        tex.BindTexture(GL_TEXTURE_2D);
+        break;
+    default:
+        break;
+    }
+}
 
 int main() {
     using Camera = cg_raytracing::scene::Camera;
@@ -107,7 +155,6 @@ int main() {
         std::println(std::cout, "glewInit error: {}",
                      (const char *)glewGetErrorString(error));
         std::exit(1);
-
     }
 
     auto version_string = glewGetString(GLEW_VERSION);
@@ -124,17 +171,15 @@ int main() {
 
     using ShaderStage = cg_raytracing::Shader::ShaderStage;
 
-
-    auto result =
-        cg_raytracing::Shader::CreateShaderFromFiles(
-            {{"./assets/main.vert", ShaderStage::VERTEX},
-             {"./assets/main.frag", ShaderStage::FRAGMENT}}) ;
+    auto result = cg_raytracing::Shader::CreateShaderFromFiles(
+        {{"./assets/main.vert", ShaderStage::VERTEX},
+         {"./assets/main.frag", ShaderStage::FRAGMENT}});
 
     if (!result) {
-        // This will now print "Could not find file assets/main.vert" 
+        // This will now print "Could not find file assets/main.vert"
         // instead of crashing with an IOT instruction
         std::cerr << "Shader Error: " << result.error() << std::endl;
-        return EXIT_FAILURE; 
+        return EXIT_FAILURE;
     }
 
     cg_raytracing::Shader shader = std::move(result.value());
@@ -164,9 +209,9 @@ int main() {
     // X, Y are in screen coordinates (in [-1.0, 1.0])
     // U, V are in texture coordinates (in [0.0, 1.0])
     constexpr Vertex2D VERTICES[4] = {{-1.0, 1.0, 0.0, 0.0},
-                              {1.0, 1.0, 1.0, 0.0},
-                              {-1.0, -1.0, 0.0, 1.0},
-                              {1.0, -1.0, 1.0, 1.0}};
+                                      {1.0, 1.0, 1.0, 0.0},
+                                      {-1.0, -1.0, 0.0, 1.0},
+                                      {1.0, -1.0, 1.0, 1.0}};
 
     // Indices in the vertex buffer to draw a quad
     constexpr float INDICES[6] = {0, 1, 2, 2, 1, 3};
@@ -188,7 +233,8 @@ int main() {
     srand(time(0));
 
     auto tex = cg_raytracing::Texture2D::CreateTexture(
-                   1, Config::IMAGE_WIDTH, Config::IMAGE_HEIGHT, cg_raytracing::TextureFormat::RGB8)
+                   1, Config::IMAGE_WIDTH, Config::IMAGE_HEIGHT,
+                   cg_raytracing::TextureFormat::RGB8)
                    .value();
     tex.SetUpscaleFilter(cg_raytracing::SamplerFilter::LINEAR);
     tex.SetDownscaleFilter(cg_raytracing::SamplerFilter::LINEAR);
@@ -213,6 +259,9 @@ int main() {
         SDL_Event ev{};
         while (SDL_PollEvent(&ev)) {
             switch (ev.type) {
+            case SDL_EVENT_KEY_DOWN:
+                HandleKeyDown(ev, my_camera, tex);
+                break;
             case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
                 close = true;
                 break;

@@ -1,6 +1,9 @@
+#include "vec3.hpp"
+#include <catch2/catch_approx.hpp>
 #include <catch2/catch_assertion_result.hpp>
 #include <catch2/catch_test_macros.hpp>
-#include "vec3.hpp"
+
+#define M_PI           3.14159265358979323846
 
 TEST_CASE("Vec3 basic operations") {
     SECTION("Sum") {
@@ -14,7 +17,7 @@ TEST_CASE("Vec3 basic operations") {
         REQUIRE(result.y == 2.0);
         REQUIRE(result.z == 2.0);
     }
-    
+
     SECTION("Sum reference") {
         using namespace cg_raytracing::math;
 
@@ -91,5 +94,17 @@ TEST_CASE("Vec3 basic operations") {
         REQUIRE(result.y == -4.0);
         REQUIRE(result.z == 3.0);
     }
-}
 
+    SECTION("Rotation") {
+        using namespace cg_raytracing::math;
+
+        Vec3 u(1.0, 0.0, 0.0);
+        Vec3 rotation_vector(0.0, 90 * (M_PI / 180),
+                             0.0); // Rotate 90 degrees around Y-axis
+        u.Rotate(rotation_vector);
+
+        REQUIRE(u.x == Catch::Approx(0.0).margin(1e-3));
+        REQUIRE(u.y == Catch::Approx(0.0).margin(1e-3));
+        REQUIRE(u.z == Catch::Approx(-1.0).margin(1e-3));
+    }
+}

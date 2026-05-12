@@ -24,6 +24,10 @@ class Vec3 {
     float length_squared() const;
     float length() const;
     Vec3  normalized() const;
+
+
+    void Rotate(const Vec3 &_rotation_angels);
+
 };
 } // namespace math
 } // namespace cg_raytracing
