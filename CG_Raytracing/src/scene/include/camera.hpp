@@ -47,6 +47,8 @@ class Camera {
            const float *_direction = Config::CAMERA_DIRECTION);
 
     void BurstRays();
+    void Rotate(const math::Vec3 &_rotation_angles);
+    void Translate(const math::Vec3 &_translation_vector);
 };
 } // namespace scene
 } // namespace cg_raytracing

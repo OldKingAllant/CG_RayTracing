@@ -26,7 +26,7 @@ class Vec3 {
     Vec3  normalized() const;
 
 
-    void rotate(const Vec3 &_rotation_angels);
+    void Rotate(const Vec3 &_rotation_angels);
 
 };
 } // namespace math

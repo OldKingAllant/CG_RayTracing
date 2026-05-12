@@ -101,7 +101,7 @@ TEST_CASE("Vec3 basic operations") {
         Vec3 u(1.0, 0.0, 0.0);
         Vec3 rotation_vector(0.0, 90 * (M_PI / 180),
                              0.0); // Rotate 90 degrees around Y-axis
-        u.rotate(rotation_vector);
+        u.Rotate(rotation_vector);
 
         REQUIRE(u.x == Catch::Approx(0.0).margin(1e-3));
         REQUIRE(u.y == Catch::Approx(0.0).margin(1e-3));

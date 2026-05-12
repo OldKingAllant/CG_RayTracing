@@ -18,20 +18,24 @@ Camera::Camera(uint32_t _sensor_size_width, uint32_t _focal_length,
       m_position(_position[0], _position[1], _position[2]),
       m_direction(_direction[0], _direction[1], _direction[2]) {
 
+    // get the top left corner from which calculate all the other rays direction
     math::Vec3 top_left =
         math::Vec3(-1 * this->m_sensor_size_width / 2,
                    -1 * this->m_sensor_size_height / 2, _focal_length);
+    top_left += this->m_position;
 
+    // get the offset for each ray for each pixel
     math::Vec3 horizontal_offset =
         math::Vec3(this->m_sensor_size_width / m_image_width, 0, 0);
     math::Vec3 vertical_offset =
         math::Vec3(0, this->m_sensor_size_height / m_image_height, 0);
 
+    // calculate the direction of the rays for each pixel
     for (uint32_t y = 0; y < this->m_image_height; y++) {
         for (uint32_t x = 0; x < this->m_image_width; x++) {
-            math::Vec3 ray_direction = top_left + horizontal_offset * x +
-                                       vertical_offset * y;
-            ray_direction.rotate(this->m_direction);
+            math::Vec3 ray_direction =
+                top_left + horizontal_offset * x + vertical_offset * y;
+            ray_direction.Rotate(this->m_direction);
             this->m_rays_matrix[y * this->m_image_width + x].SetDirection(
                 ray_direction);
             this->m_rays_matrix[y * this->m_image_width + x].SetOrigin(
@@ -135,4 +139,20 @@ void Camera::BurstRays() {
     std::println(std::cout, "Total hits: {}", hit_count);
     std::println(std::cout, "Sphere hits: {}", hit_sphere_count);
     std::println(std::cout, "Cube hits: {}", hit_cube_count);
+}
+
+
+void Camera::Rotate(const math::Vec3 &_rotation_angles) {
+    this->m_direction.Rotate(_rotation_angles);
+
+    for (auto &Ray : this->m_rays_matrix) {
+        Ray.Rotate(_rotation_angles);
+    }
+}
+
+void Camera::Translate(const math::Vec3 &_translation_vector) {
+    this->m_position += _translation_vector;
+    for (auto &Ray : this->m_rays_matrix) {
+        Ray.Translate(_translation_vector);
+    }
 }

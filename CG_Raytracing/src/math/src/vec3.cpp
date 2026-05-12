@@ -81,7 +81,7 @@ Vec3 Vec3::normalized() const {
     return *this / len;
 }
 
-void Vec3::rotate(const Vec3 &_rotation_angles) {
+void Vec3::Rotate(const Vec3 &_rotation_angles) {
     // rotation around x
     float old_y = this->y;
     float old_z = this->z;
