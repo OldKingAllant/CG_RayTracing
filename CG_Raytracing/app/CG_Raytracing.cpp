@@ -2,7 +2,9 @@
 //
 
 #include "CG_Raytracing.h"
+#include "vec3.hpp"
 
+#include <SDL3/SDL_assert.h>
 #include <camera.hpp>
 #include <config.hpp>
 
@@ -51,6 +53,54 @@ struct Vertex2D {
                     (char *)&v - (char *)this}};
     }
 };
+
+// function to move the camera around. Probably in the future is better to move
+// this in another file and optimize it
+void HandleKeyDown(SDL_Event &_ev,
+                   std::unique_ptr<cg_raytracing::scene::Camera> &_my_camera,
+                   cg_raytracing::Texture2D &tex) {
+    SDL_assert(_ev.type == SDL_EVENT_KEY_DOWN);
+    switch (_ev.key.scancode) {
+    case SDL_SCANCODE_W:
+        _my_camera->Rotate(cg_raytracing::math::Vec3(0.02, 0.0, 0.0));
+        _my_camera->BurstRays();
+        tex.CopyFromBuffer(_my_camera->m_img_buf.data(), 0, 0, 0,
+                           tex.GetWidth(), tex.GetHeight(),
+                           cg_raytracing::PixelFormat::RGB,
+                           cg_raytracing::PixelDataType::UNSIGNED_BYTE);
+        tex.BindTexture(GL_TEXTURE_2D);
+        break;
+    case SDL_SCANCODE_A:
+        _my_camera->Rotate(cg_raytracing::math::Vec3(0.0, -0.02, 0.0));
+        _my_camera->BurstRays();
+        tex.CopyFromBuffer(_my_camera->m_img_buf.data(), 0, 0, 0,
+                           tex.GetWidth(), tex.GetHeight(),
+                           cg_raytracing::PixelFormat::RGB,
+                           cg_raytracing::PixelDataType::UNSIGNED_BYTE);
+        tex.BindTexture(GL_TEXTURE_2D);
+        break;
+    case SDL_SCANCODE_S:
+        _my_camera->Rotate(cg_raytracing::math::Vec3(-0.02, 0.0, 0.0));
+        _my_camera->BurstRays();
+        tex.CopyFromBuffer(_my_camera->m_img_buf.data(), 0, 0, 0,
+                           tex.GetWidth(), tex.GetHeight(),
+                           cg_raytracing::PixelFormat::RGB,
+                           cg_raytracing::PixelDataType::UNSIGNED_BYTE);
+        tex.BindTexture(GL_TEXTURE_2D);
+        break;
+    case SDL_SCANCODE_D:
+        _my_camera->Rotate(cg_raytracing::math::Vec3(0.0, 0.02, 0.0));
+        _my_camera->BurstRays();
+        tex.CopyFromBuffer(_my_camera->m_img_buf.data(), 0, 0, 0,
+                           tex.GetWidth(), tex.GetHeight(),
+                           cg_raytracing::PixelFormat::RGB,
+                           cg_raytracing::PixelDataType::UNSIGNED_BYTE);
+        tex.BindTexture(GL_TEXTURE_2D);
+        break;
+    default:
+        break;
+    }
+}
 
 int main() {
     using Camera = cg_raytracing::scene::Camera;
@@ -209,6 +259,9 @@ int main() {
         SDL_Event ev{};
         while (SDL_PollEvent(&ev)) {
             switch (ev.type) {
+            case SDL_EVENT_KEY_DOWN:
+                HandleKeyDown(ev, my_camera, tex);
+                break;
             case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
                 close = true;
                 break;
