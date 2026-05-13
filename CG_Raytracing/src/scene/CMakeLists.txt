@@ -1,6 +1,7 @@
 add_library(Scene STATIC
     "src/camera.cpp"
     "include/camera.hpp"
+    "include/PointLight.hpp"
 )
 
 set_property(TARGET Scene PROPERTY CXX_STANDARD 23)

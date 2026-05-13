@@ -1,5 +1,6 @@
 #pragma once
 
+#include "PointLight.hpp"
 #include "TextureFormats.hpp"
 #include "config.hpp"
 #include "ray.hpp"
@@ -46,7 +47,13 @@ class Camera {
            const float *_position = Config::CAMERA_POSITION,
            const float *_direction = Config::CAMERA_DIRECTION);
 
-    void BurstRays();
+    //void BurstRays();
+
+    void BurstRays(cg_raytracing::scene::PointLight& light);
+
+
+    void Rotate(const math::Vec3 &_rotation_angles);
+    void Translate(const math::Vec3 &_translation_vector);
 };
 } // namespace scene
 } // namespace cg_raytracing
