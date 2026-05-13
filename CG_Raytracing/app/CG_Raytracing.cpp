@@ -16,6 +16,7 @@
 #include <Shader.hpp>
 #include <Texture2D.hpp>
 #include <VertexBuffer.hpp>
+#include <PointLight.hpp>
 
 #include <bit>
 #include <ctime>
@@ -58,12 +59,13 @@ struct Vertex2D {
 // this in another file and optimize it
 void HandleKeyDown(SDL_Event &_ev,
                    std::unique_ptr<cg_raytracing::scene::Camera> &_my_camera,
+                   cg_raytracing::scene::PointLight &_light,
                    cg_raytracing::Texture2D &tex) {
     SDL_assert(_ev.type == SDL_EVENT_KEY_DOWN);
     switch (_ev.key.scancode) {
     case SDL_SCANCODE_W:
         _my_camera->Rotate(cg_raytracing::math::Vec3(0.02, 0.0, 0.0));
-        _my_camera->BurstRays();
+        _my_camera->BurstRays(_light);
         tex.CopyFromBuffer(_my_camera->m_img_buf.data(), 0, 0, 0,
                            tex.GetWidth(), tex.GetHeight(),
                            cg_raytracing::PixelFormat::RGB,
@@ -72,7 +74,7 @@ void HandleKeyDown(SDL_Event &_ev,
         break;
     case SDL_SCANCODE_A:
         _my_camera->Rotate(cg_raytracing::math::Vec3(0.0, -0.02, 0.0));
-        _my_camera->BurstRays();
+        _my_camera->BurstRays(_light);
         tex.CopyFromBuffer(_my_camera->m_img_buf.data(), 0, 0, 0,
                            tex.GetWidth(), tex.GetHeight(),
                            cg_raytracing::PixelFormat::RGB,
@@ -81,7 +83,7 @@ void HandleKeyDown(SDL_Event &_ev,
         break;
     case SDL_SCANCODE_S:
         _my_camera->Rotate(cg_raytracing::math::Vec3(-0.02, 0.0, 0.0));
-        _my_camera->BurstRays();
+        _my_camera->BurstRays(_light);
         tex.CopyFromBuffer(_my_camera->m_img_buf.data(), 0, 0, 0,
                            tex.GetWidth(), tex.GetHeight(),
                            cg_raytracing::PixelFormat::RGB,
@@ -90,11 +92,47 @@ void HandleKeyDown(SDL_Event &_ev,
         break;
     case SDL_SCANCODE_D:
         _my_camera->Rotate(cg_raytracing::math::Vec3(0.0, 0.02, 0.0));
-        _my_camera->BurstRays();
+        _my_camera->BurstRays(_light);
         tex.CopyFromBuffer(_my_camera->m_img_buf.data(), 0, 0, 0,
                            tex.GetWidth(), tex.GetHeight(),
                            cg_raytracing::PixelFormat::RGB,
                            cg_raytracing::PixelDataType::UNSIGNED_BYTE);
+        tex.BindTexture(GL_TEXTURE_2D);
+        break;
+    case SDL_SCANCODE_J:
+        _light.m_position.z -= 50.0f;
+        _my_camera->BurstRays(_light);
+        tex.CopyFromBuffer(_my_camera->m_img_buf.data(), 0, 0, 0,
+                        tex.GetWidth(), tex.GetHeight(),
+                        cg_raytracing::PixelFormat::RGB,
+                        cg_raytracing::PixelDataType::UNSIGNED_BYTE);
+        tex.BindTexture(GL_TEXTURE_2D);
+        break;
+    case SDL_SCANCODE_U:
+        _light.m_position.z += 50.0f;
+        _my_camera->BurstRays(_light);
+        tex.CopyFromBuffer(_my_camera->m_img_buf.data(), 0, 0, 0,
+                        tex.GetWidth(), tex.GetHeight(),
+                        cg_raytracing::PixelFormat::RGB,
+                        cg_raytracing::PixelDataType::UNSIGNED_BYTE);
+        tex.BindTexture(GL_TEXTURE_2D);
+        break;
+    case SDL_SCANCODE_K:
+        _light.m_position.x += 50.0f;
+        _my_camera->BurstRays(_light);
+        tex.CopyFromBuffer(_my_camera->m_img_buf.data(), 0, 0, 0,
+                        tex.GetWidth(), tex.GetHeight(),
+                        cg_raytracing::PixelFormat::RGB,
+                        cg_raytracing::PixelDataType::UNSIGNED_BYTE);
+        tex.BindTexture(GL_TEXTURE_2D);
+        break;
+    case SDL_SCANCODE_H:
+        _light.m_position.x -= 50.0f;
+        _my_camera->BurstRays(_light);
+        tex.CopyFromBuffer(_my_camera->m_img_buf.data(), 0, 0, 0,
+                        tex.GetWidth(), tex.GetHeight(),
+                        cg_raytracing::PixelFormat::RGB,
+                        cg_raytracing::PixelDataType::UNSIGNED_BYTE);
         tex.BindTexture(GL_TEXTURE_2D);
         break;
     default:
@@ -247,7 +285,12 @@ int main() {
     //                    tex.GetHeight(), cg_raytracing::PixelFormat::RGB,
     //                    cg_raytracing::PixelDataType::UNSIGNED_BYTE);
 
-    my_camera->BurstRays();
+    cg_raytracing::scene::PointLight light(
+        cg_raytracing::math::Vec3(0.0f, 0.0f, 150.0f),
+        cg_raytracing::math::Vec3(1.0f, 1.0f, 1.0f),
+        1.5f
+    );
+    my_camera->BurstRays(light);
 
     tex.CopyFromBuffer(my_camera->m_img_buf.data(), 0, 0, 0, tex.GetWidth(),
                        tex.GetHeight(), cg_raytracing::PixelFormat::RGB,
@@ -260,7 +303,7 @@ int main() {
         while (SDL_PollEvent(&ev)) {
             switch (ev.type) {
             case SDL_EVENT_KEY_DOWN:
-                HandleKeyDown(ev, my_camera, tex);
+                HandleKeyDown(ev, my_camera, light, tex);
                 break;
             case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
                 close = true;
