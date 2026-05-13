@@ -70,7 +70,6 @@ void HandleKeyDown(SDL_Event &_ev,
                            tex.GetWidth(), tex.GetHeight(),
                            cg_raytracing::PixelFormat::RGB,
                            cg_raytracing::PixelDataType::UNSIGNED_BYTE);
-        tex.BindTexture(GL_TEXTURE_2D);
         break;
     case SDL_SCANCODE_A:
         _my_camera->Rotate(cg_raytracing::math::Vec3(0.0, -0.02, 0.0));
@@ -79,7 +78,6 @@ void HandleKeyDown(SDL_Event &_ev,
                            tex.GetWidth(), tex.GetHeight(),
                            cg_raytracing::PixelFormat::RGB,
                            cg_raytracing::PixelDataType::UNSIGNED_BYTE);
-        tex.BindTexture(GL_TEXTURE_2D);
         break;
     case SDL_SCANCODE_S:
         _my_camera->Rotate(cg_raytracing::math::Vec3(-0.02, 0.0, 0.0));
@@ -88,7 +86,6 @@ void HandleKeyDown(SDL_Event &_ev,
                            tex.GetWidth(), tex.GetHeight(),
                            cg_raytracing::PixelFormat::RGB,
                            cg_raytracing::PixelDataType::UNSIGNED_BYTE);
-        tex.BindTexture(GL_TEXTURE_2D);
         break;
     case SDL_SCANCODE_D:
         _my_camera->Rotate(cg_raytracing::math::Vec3(0.0, 0.02, 0.0));
@@ -97,7 +94,6 @@ void HandleKeyDown(SDL_Event &_ev,
                            tex.GetWidth(), tex.GetHeight(),
                            cg_raytracing::PixelFormat::RGB,
                            cg_raytracing::PixelDataType::UNSIGNED_BYTE);
-        tex.BindTexture(GL_TEXTURE_2D);
         break;
     case SDL_SCANCODE_J:
         _light.m_position.z -= 50.0f;
@@ -106,7 +102,6 @@ void HandleKeyDown(SDL_Event &_ev,
                         tex.GetWidth(), tex.GetHeight(),
                         cg_raytracing::PixelFormat::RGB,
                         cg_raytracing::PixelDataType::UNSIGNED_BYTE);
-        tex.BindTexture(GL_TEXTURE_2D);
         break;
     case SDL_SCANCODE_U:
         _light.m_position.z += 50.0f;
@@ -115,7 +110,6 @@ void HandleKeyDown(SDL_Event &_ev,
                         tex.GetWidth(), tex.GetHeight(),
                         cg_raytracing::PixelFormat::RGB,
                         cg_raytracing::PixelDataType::UNSIGNED_BYTE);
-        tex.BindTexture(GL_TEXTURE_2D);
         break;
     case SDL_SCANCODE_K:
         _light.m_position.x += 50.0f;
@@ -124,7 +118,6 @@ void HandleKeyDown(SDL_Event &_ev,
                         tex.GetWidth(), tex.GetHeight(),
                         cg_raytracing::PixelFormat::RGB,
                         cg_raytracing::PixelDataType::UNSIGNED_BYTE);
-        tex.BindTexture(GL_TEXTURE_2D);
         break;
     case SDL_SCANCODE_H:
         _light.m_position.x -= 50.0f;
@@ -133,7 +126,6 @@ void HandleKeyDown(SDL_Event &_ev,
                         tex.GetWidth(), tex.GetHeight(),
                         cg_raytracing::PixelFormat::RGB,
                         cg_raytracing::PixelDataType::UNSIGNED_BYTE);
-        tex.BindTexture(GL_TEXTURE_2D);
         break;
     default:
         break;
