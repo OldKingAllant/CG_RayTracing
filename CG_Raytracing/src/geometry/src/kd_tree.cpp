@@ -29,8 +29,6 @@ namespace cg_raytracing::geometry {
 			};
 
 			auto bit_expand = [](uint64_t _val) {
-				// Separate the bits with two spaces
-				// to allow interleaving the coordinates
 				// - First separate the bytes FFFF -> 00FF 00FF
 				// - Separate nibbles 0FF0FF -> 0F0F0F0F
 				// - Create pairs of two bits
@@ -40,24 +38,15 @@ namespace cg_raytracing::geometry {
 				_val = (_val | (_val << 4)) & 0x0F0F'0F0FULL;
 				_val = (_val | (_val << 2)) & 0x3333'3333ULL;
 				_val = (_val | (_val << 1)) & 0x5555'5555ULL;
-				//_val = (_val | (_val << 1)) & 0x9999'9999ULL;
 				return _val;
 			};
 
 			auto bit_expand64 = [](uint64_t _val) {
-				// Separate the bits with two spaces
-				// to allow interleaving the coordinates
-				// - First separate the bytes FFFF -> 00FF 00FF
-				// - Separate nibbles 0FF0FF -> 0F0F0F0F
-				// - Create pairs of two bits
-				// - Isolate all bits
-				// - Add another empty bit
 				_val = (_val | (_val << 16)) & 0x0000'FFFF'0000'FFFFULL;
 				_val = (_val | (_val << 8))  & 0x00FF'00FF'00FF'00FFULL;
 				_val = (_val | (_val << 4))  & 0x0F0F'0F0F'0F0F'0F0FULL;
 				_val = (_val | (_val << 2))  & 0x3333'3333'3333'3333ULL;
 				_val = (_val | (_val << 1))  & 0x5555'5555'5555'5555ULL;
-				//_val = (_val | (_val << 1)) & 0x9999'9999ULL;
 				return _val;
 			};
 
@@ -153,6 +142,13 @@ namespace cg_raytracing::geometry {
 		flat_tree.reserve(alloc_size);
 		flat_tree.push_back(root);
 
+		if (1 == num_codes) {
+			auto& node = flat_tree.back();
+			node.bbox = _hittables[_list[0].first]->GetBoundingBox();
+			node.obj_index = _list[0].first;
+			return flat_tree;
+		}
+
 		std::stack<std::pair<size_t, size_t>> ranges_to_visit_l{};
 		std::stack<std::pair<size_t, size_t>> ranges_to_visit_r{};
 		std::stack<size_t> parents{};
@@ -165,7 +161,6 @@ namespace cg_raytracing::geometry {
 
 		parents.push(0);
 
-		bool was_l = true;
 		while (!ranges_to_visit_l.empty() || !ranges_to_visit_r.empty()) {
 			std::pair<size_t, size_t> curr_range{};
 			// Are we at the right of a node?
@@ -180,6 +175,10 @@ namespace cg_raytracing::geometry {
 				curr_range = ranges_to_visit_r.top();
 				ranges_to_visit_r.pop();
 				is_r = true;
+			}
+
+			if (curr_range.first > curr_range.second) {
+				continue;
 			}
 
 			FlatKDNode new_node{};
@@ -229,8 +228,6 @@ namespace cg_raytracing::geometry {
 
 				parents.push(curr_pos);
 			}
-
-			was_l = !is_r;
 		}
 
 		// Complete the flat tree by grouping the various boxes
@@ -446,8 +443,52 @@ namespace cg_raytracing::geometry {
 		}
 	}
 
-	std::optional<FlatKDNode const*> KDTree::RayIntersectsObject(math::Ray const& _ray) const {
-		return std::nullopt;
+	std::vector<FlatKDNode const*> KDTree::RayIntersectsObjects(math::Ray const& _ray) const {
+		std::vector<FlatKDNode const*> intersected_nodes{};
+
+		std::stack<size_t> nodes_to_visit{};
+		nodes_to_visit.push(0);
+
+		while (!nodes_to_visit.empty()) {
+			auto curr_node_index = nodes_to_visit.top();
+			nodes_to_visit.pop();
+
+			auto const& node = m_flat_tree[curr_node_index];
+			auto does_intersect = node.bbox.RayIntersect(_ray);
+
+			if (!does_intersect) {
+				// Ray does not intersect this node
+				// The underlying nodes cannot
+				// be intersected, go to the next
+				// node
+				continue;
+			}
+
+			if (node.obj_index.has_value()) {
+				// Intersected node is leaf,
+				// add to the list
+				intersected_nodes.push_back(&node);
+				continue;
+			}
+
+			// Append left and right nodes to the nodes to visit, if present
+
+			if (node.right.has_value()) {
+				nodes_to_visit.push(node.right.value());
+			}
+
+			if (node.left.has_value()) {
+				nodes_to_visit.push(node.left.value());
+			}
+		}
+
+		return intersected_nodes;
+	}
+
+	size_t KDTree::GetObjectCount() const {
+		size_t object_count{};
+		VisitDSF([&object_count](auto const& _node) { object_count++; }, true);
+		return object_count;
 	}
 
 	KDTree::KDTree() :
