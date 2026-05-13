@@ -4,12 +4,21 @@ add_library(Geometry STATIC
     "src/triangle.cpp"
     "src/sphere.cpp"
     "src/hit_record.cpp"
+    "src/kd_tree.cpp"
+    "src/hittable.cpp"
+    "include/geometry.hpp"
+    "include/cube.hpp"
+    "include/triangle.hpp"
+    "include/sphere.hpp"
+    "include/hit_record.hpp"
+    "include/kd_tree.hpp"
+    "include/hittable.hpp"
 )
 
 target_include_directories(Geometry PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
 set_property(TARGET Geometry PROPERTY CXX_STANDARD 23)
 
-target_include_directories(Geometry PUBLIC "./include/")
+#target_include_directories(Geometry PUBLIC "./include/")
 
 target_link_libraries(Geometry PUBLIC common Math)

@@ -4,11 +4,13 @@
 #include "material.hpp"
 #include "ray.hpp"
 #include "vec3.hpp"
+#include <hittable.hpp>
+
 #include <optional>
 
 namespace cg_raytracing::geometry {
 
-class Sphere {
+class Sphere : public Hittable {
 public:
     cg_raytracing::math::Vec3 m_center;
     float                     m_radius;
@@ -19,6 +21,8 @@ public:
     std::optional<HitRecord> Hit(const cg_raytracing::math::Ray& _ray,
                                  float _t_min = 0.001f,
                                  float _t_max = 1e9f) const;
+
+    BoundingBox GetBoundingBox() const override;
 };
 
 } // namespace cg_raytracing::geometry
