@@ -142,6 +142,13 @@ namespace cg_raytracing::geometry {
 		flat_tree.reserve(alloc_size);
 		flat_tree.push_back(root);
 
+		if (1 == num_codes) {
+			auto& node = flat_tree.back();
+			node.bbox = _hittables[_list[0].first]->GetBoundingBox();
+			node.obj_index = _list[0].first;
+			return flat_tree;
+		}
+
 		std::stack<std::pair<size_t, size_t>> ranges_to_visit_l{};
 		std::stack<std::pair<size_t, size_t>> ranges_to_visit_r{};
 		std::stack<size_t> parents{};
@@ -168,6 +175,10 @@ namespace cg_raytracing::geometry {
 				curr_range = ranges_to_visit_r.top();
 				ranges_to_visit_r.pop();
 				is_r = true;
+			}
+
+			if (curr_range.first > curr_range.second) {
+				continue;
 			}
 
 			FlatKDNode new_node{};
@@ -432,8 +443,52 @@ namespace cg_raytracing::geometry {
 		}
 	}
 
-	std::optional<FlatKDNode const*> KDTree::RayIntersectsObject(math::Ray const& _ray) const {
-		return std::nullopt;
+	std::vector<FlatKDNode const*> KDTree::RayIntersectsObject(math::Ray const& _ray) const {
+		std::vector<FlatKDNode const*> intersected_nodes{};
+
+		std::stack<size_t> nodes_to_visit{};
+		nodes_to_visit.push(0);
+
+		while (!nodes_to_visit.empty()) {
+			auto curr_node_index = nodes_to_visit.top();
+			nodes_to_visit.pop();
+
+			auto const& node = m_flat_tree[curr_node_index];
+			auto does_intersect = node.bbox.RayIntersect(_ray);
+
+			if (!does_intersect) {
+				// Ray does not intersect this node
+				// The underlying nodes cannot
+				// be intersected, go to the next
+				// node
+				continue;
+			}
+
+			if (node.obj_index.has_value()) {
+				// Intersected node is leaf,
+				// add to the list
+				intersected_nodes.push_back(&node);
+				continue;
+			}
+
+			// Append left and right nodes to the nodes to visit, if present
+
+			if (node.right.has_value()) {
+				nodes_to_visit.push(node.right.value());
+			}
+
+			if (node.left.has_value()) {
+				nodes_to_visit.push(node.left.value());
+			}
+		}
+
+		return intersected_nodes;
+	}
+
+	size_t KDTree::GetObjectCount() const {
+		size_t object_count{};
+		VisitDSF([&object_count](auto const& _node) { object_count++; }, true);
+		return object_count;
 	}
 
 	KDTree::KDTree() :

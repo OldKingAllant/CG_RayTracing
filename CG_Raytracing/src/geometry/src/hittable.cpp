@@ -1,6 +1,7 @@
 #include <hittable.hpp>
 
 #include <cmath>
+#include <algorithm>
 
 namespace cg_raytracing::geometry {
 	BoundingBox BoundingBox::Create(float _x, float _y, float _z,
@@ -71,5 +72,45 @@ namespace cg_raytracing::geometry {
 
 	float BoundingBox::Volume() const noexcept {
 		return SizeX() * SizeY() * SizeZ();
+	}
+
+	bool BoundingBox::RayIntersect(math::Ray const& _ray,
+		float _t_min,
+		float _t_max) const {
+		float t_enter = _t_min;
+		float t_exit = _t_max;
+
+		int hit_axis = -1;
+		bool hit_negative = false;
+
+		const float origins[3] = { _ray.m_origin.x,    _ray.m_origin.y,    _ray.m_origin.z };
+		const float directions[3] = { _ray.m_direction.x, _ray.m_direction.y, _ray.m_direction.z };
+		const float mins[3] = { min_x, min_y, min_z };
+		const float maxs[3] = { max_x, max_y, max_z };
+
+		auto get_next_dimension = [](uint32_t _dim) {
+			return (_dim + 1) % 3;
+		};
+
+		for (uint32_t i = 0; i < 3; i++) {
+			const float inv_d = 1.0f / directions[i];
+			float t0 = (mins[i] - origins[i]) * inv_d; // hit near plane
+			float t1 = (maxs[i] - origins[i]) * inv_d; // hit far plane
+
+			bool negative_dir = inv_d < 0.0f;
+			if (negative_dir) std::swap(t0, t1);
+
+			if (t0 > t_enter) {
+				t_enter = t0;
+				hit_axis = i;
+				hit_negative = negative_dir;
+			}
+			t_exit = std::min(t_exit, t1);
+
+			if (t_exit <= t_enter)
+				return false;
+		}
+
+		return _t_min < t_enter && t_enter < _t_max;
 	}
 }

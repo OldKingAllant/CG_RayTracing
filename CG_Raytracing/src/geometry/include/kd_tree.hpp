@@ -46,7 +46,18 @@ namespace cg_raytracing::geometry {
 		/// <param name="_fun">Callback, a reference to the current node is passed</param>
 		void VisitBSF(std::function<void(FlatKDNode const&)>&& _fun) const;
 
-		std::optional<FlatKDNode const*> RayIntersectsObject(math::Ray const& _ray) const;
+		/// <summary>
+		/// Return list of leaf nodes that the ray intersects
+		/// </summary>
+		/// <param name="_ray">The ray</param>
+		/// <returns>List of nodes</returns>
+		std::vector<FlatKDNode const*> RayIntersectsObject(math::Ray const& _ray) const;
+
+		/// <summary>
+		/// Get total number of tracked objects in the BVH
+		/// </summary>
+		/// <returns>Number of objects</returns>
+		size_t GetObjectCount() const;
 
 	private :
 		KDTree();
