@@ -29,8 +29,6 @@ namespace cg_raytracing::geometry {
 			};
 
 			auto bit_expand = [](uint64_t _val) {
-				// Separate the bits with two spaces
-				// to allow interleaving the coordinates
 				// - First separate the bytes FFFF -> 00FF 00FF
 				// - Separate nibbles 0FF0FF -> 0F0F0F0F
 				// - Create pairs of two bits
@@ -40,24 +38,15 @@ namespace cg_raytracing::geometry {
 				_val = (_val | (_val << 4)) & 0x0F0F'0F0FULL;
 				_val = (_val | (_val << 2)) & 0x3333'3333ULL;
 				_val = (_val | (_val << 1)) & 0x5555'5555ULL;
-				//_val = (_val | (_val << 1)) & 0x9999'9999ULL;
 				return _val;
 			};
 
 			auto bit_expand64 = [](uint64_t _val) {
-				// Separate the bits with two spaces
-				// to allow interleaving the coordinates
-				// - First separate the bytes FFFF -> 00FF 00FF
-				// - Separate nibbles 0FF0FF -> 0F0F0F0F
-				// - Create pairs of two bits
-				// - Isolate all bits
-				// - Add another empty bit
 				_val = (_val | (_val << 16)) & 0x0000'FFFF'0000'FFFFULL;
 				_val = (_val | (_val << 8))  & 0x00FF'00FF'00FF'00FFULL;
 				_val = (_val | (_val << 4))  & 0x0F0F'0F0F'0F0F'0F0FULL;
 				_val = (_val | (_val << 2))  & 0x3333'3333'3333'3333ULL;
 				_val = (_val | (_val << 1))  & 0x5555'5555'5555'5555ULL;
-				//_val = (_val | (_val << 1)) & 0x9999'9999ULL;
 				return _val;
 			};
 
@@ -165,7 +154,6 @@ namespace cg_raytracing::geometry {
 
 		parents.push(0);
 
-		bool was_l = true;
 		while (!ranges_to_visit_l.empty() || !ranges_to_visit_r.empty()) {
 			std::pair<size_t, size_t> curr_range{};
 			// Are we at the right of a node?
@@ -229,8 +217,6 @@ namespace cg_raytracing::geometry {
 
 				parents.push(curr_pos);
 			}
-
-			was_l = !is_r;
 		}
 
 		// Complete the flat tree by grouping the various boxes
