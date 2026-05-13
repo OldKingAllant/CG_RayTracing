@@ -1,9 +1,9 @@
 add_executable(UnitTests 
     "./test_main.cpp"
     "./math/test_Vec3.cpp"
-)
+ "geometry/test_kd_tree.cpp")
 
-target_link_libraries(UnitTests PRIVATE Math)
+target_link_libraries(UnitTests PRIVATE Math Geometry)
 
 target_include_directories(UnitTests PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
 
@@ -19,6 +19,8 @@ elseif(UNIX)
 endif()
 
 target_link_libraries(UnitTests PRIVATE Catch2::Catch2WithMain)
+
+set_property(TARGET UnitTests PROPERTY CXX_STANDARD 23)
 
 include(CTest)
 include(Catch)

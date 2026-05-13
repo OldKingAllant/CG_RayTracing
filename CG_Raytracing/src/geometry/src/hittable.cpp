@@ -80,7 +80,7 @@ namespace cg_raytracing::geometry {
 		float t_enter = _t_min;
 		float t_exit = _t_max;
 
-		int hit_axis = -1;
+		int32_t hit_axis = -1;
 		bool hit_negative = false;
 
 		const float origins[3] = { _ray.m_origin.x,    _ray.m_origin.y,    _ray.m_origin.z };
@@ -88,11 +88,11 @@ namespace cg_raytracing::geometry {
 		const float mins[3] = { min_x, min_y, min_z };
 		const float maxs[3] = { max_x, max_y, max_z };
 
-		auto get_next_dimension = [](uint32_t _dim) {
-			return (_dim + 1) % 3;
-		};
+		uint32_t origins_inside_minmax{};
 
 		for (uint32_t i = 0; i < 3; i++) {
+			origins_inside_minmax += ((origins[i] >= mins[i]) && (origins[i] <= maxs[i])) ? 1 : 0;
+
 			const float inv_d = 1.0f / directions[i];
 			float t0 = (mins[i] - origins[i]) * inv_d; // hit near plane
 			float t1 = (maxs[i] - origins[i]) * inv_d; // hit far plane
@@ -111,6 +111,6 @@ namespace cg_raytracing::geometry {
 				return false;
 		}
 
-		return _t_min < t_enter && t_enter < _t_max;
+		return (origins_inside_minmax == 3) || (_t_min < t_enter && t_enter < _t_max);
 	}
 }

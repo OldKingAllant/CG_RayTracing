@@ -443,7 +443,7 @@ namespace cg_raytracing::geometry {
 		}
 	}
 
-	std::vector<FlatKDNode const*> KDTree::RayIntersectsObject(math::Ray const& _ray) const {
+	std::vector<FlatKDNode const*> KDTree::RayIntersectsObjects(math::Ray const& _ray) const {
 		std::vector<FlatKDNode const*> intersected_nodes{};
 
 		std::stack<size_t> nodes_to_visit{};

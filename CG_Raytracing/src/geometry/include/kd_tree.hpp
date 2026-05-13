@@ -51,7 +51,7 @@ namespace cg_raytracing::geometry {
 		/// </summary>
 		/// <param name="_ray">The ray</param>
 		/// <returns>List of nodes</returns>
-		std::vector<FlatKDNode const*> RayIntersectsObject(math::Ray const& _ray) const;
+		std::vector<FlatKDNode const*> RayIntersectsObjects(math::Ray const& _ray) const;
 
 		/// <summary>
 		/// Get total number of tracked objects in the BVH
