@@ -3,6 +3,7 @@
 #include <cstdint>
 
 #include <vec3.hpp>
+#include <ray.hpp>
 
 namespace cg_raytracing::geometry {
 	struct BoundingBox {
@@ -27,6 +28,10 @@ namespace cg_raytracing::geometry {
 		float SizeZ() const noexcept;
 
 		float Volume() const noexcept;
+
+		bool RayIntersect(math::Ray const& _ray, 
+			float _t_min = 0.001f,
+			float _t_max = 1e9) const;
 	};
 
 	class Hittable {
