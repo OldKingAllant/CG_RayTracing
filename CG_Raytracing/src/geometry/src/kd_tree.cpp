@@ -7,6 +7,7 @@
 #include <stdexcept>
 #include <unordered_set>
 #include <deque>
+#include <tuple>
 
 namespace cg_raytracing::geometry {
 	namespace detail {
@@ -443,31 +444,72 @@ namespace cg_raytracing::geometry {
 		}
 	}
 
-	std::vector<FlatKDNode const*> KDTree::RayIntersectsObjects(math::Ray const& _ray) const {
-		std::vector<FlatKDNode const*> intersected_nodes{};
+	template<KDTree::SearchType _SearchType>
+	std::vector<std::pair<FlatKDNode const*, math::Vec3>> KDTree::SearchIntersections(
+		KDTree::SearchParams const& _params,
+		size_t _count) const {
+		// Having O the origin of ray/bbox/sphere and P the point of intersection with a bbox
+		// And D = |P - O|
+		// Contains a list of (D, OBJ_INDEX, P)
+		std::vector<std::tuple<float, size_t, math::Vec3>> unordered_nodes{};
 
 		std::stack<size_t> nodes_to_visit{};
-		nodes_to_visit.push(0);
+		nodes_to_visit.push(0); // Start from the root
+
+		constexpr auto MAX_COUNT_VALUE = std::numeric_limits<size_t>::max();
+
+		// Reference point
+		math::Vec3 _p{};
+
+		// Extract reference point from the correct structure
+		if constexpr (_SearchType == SearchType::RAY) {
+			_p = _params.ray.m_origin;
+		}
+		else if constexpr (_SearchType == SearchType::SPHERE) {
+			_p = _params.center;
+		}
+		else if constexpr (_SearchType == SearchType::BBOX) {
+			_p = _params.bbox.pos;
+		}
 
 		while (!nodes_to_visit.empty()) {
 			auto curr_node_index = nodes_to_visit.top();
 			nodes_to_visit.pop();
 
 			auto const& node = m_flat_tree[curr_node_index];
-			auto does_intersect = node.bbox.RayIntersect(_ray);
+			std::optional<math::Vec3> intersect_point{};
 
-			if (!does_intersect) {
-				// Ray does not intersect this node
-				// The underlying nodes cannot
-				// be intersected, go to the next
-				// node
+			// Check intersection based on type
+			if constexpr (_SearchType == SearchType::RAY) {
+				intersect_point = node.bbox.RayIntersect(_params.ray);
+			}
+			else if constexpr (_SearchType == SearchType::SPHERE) {
+				intersect_point = node.bbox.SphereIntersect(_params.center, _params.radius);
+			} 
+			else if constexpr (_SearchType == SearchType::BBOX) {
+				intersect_point = node.bbox.BBIntersect(_params.bbox);
+			}
+
+			if (!intersect_point.has_value()) {
 				continue;
 			}
 
 			if (node.obj_index.has_value()) {
-				// Intersected node is leaf,
-				// add to the list
-				intersected_nodes.push_back(&node);
+				// Intersected node is leaf, 
+				// get hit point
+				auto hit_coord = intersect_point.value();
+				// Compute distance from origin of 
+				// ray/sphere/bbox
+				auto distance = (hit_coord - _p).length();
+				// Append the distance, obj index and point of intersection
+				unordered_nodes.push_back({ distance, node.obj_index.value(), hit_coord });
+
+				if (MAX_COUNT_VALUE != _count) { // If the KNN is bound
+					--_count; // Check if we have reached the limit
+					if (0 == _count) {
+						break;
+					}
+				}
 				continue;
 			}
 
@@ -482,7 +524,44 @@ namespace cg_raytracing::geometry {
 			}
 		}
 
+		if (unordered_nodes.size() == 0) {
+			return {};
+		}
+
+		// The list contains the distance and a reference to the node
+		// Ordering by increasing distance will also order the references
+		std::sort(unordered_nodes.begin(), unordered_nodes.end(), [](auto const& _l, auto const& _r) {
+			return std::get<0>(_r) > std::get<0>(_l);
+		});
+
+		std::vector<std::pair<FlatKDNode const*, math::Vec3>> intersected_nodes{};
+		intersected_nodes.resize(unordered_nodes.size());
+
+		// Extract ordered references and intersection points
+		for (size_t o_index = 0; auto const& hit_info : unordered_nodes) {
+			intersected_nodes[o_index] = { &m_flat_tree[std::get<1>(hit_info)], std::get<2>(hit_info) };
+			o_index++;
+		}
+
 		return intersected_nodes;
+	}
+
+	std::vector<std::pair<FlatKDNode const*, math::Vec3>> KDTree::RayIntersectsObjects(math::Ray const& _ray) const {
+		SearchParams params{};
+		params.ray = _ray;
+
+		return SearchIntersections<SearchType::RAY>(params);
+	}
+
+	std::vector<std::pair<FlatKDNode const*, math::Vec3>> KDTree::NearestNeighbours(
+		math::Vec3 const& _p, 
+		float _radius, 
+		size_t _count) const {
+		SearchParams params{};
+		params.center = _p;
+		params.radius = _radius;
+
+		return SearchIntersections<SearchType::SPHERE>(params, _count);
 	}
 
 	size_t KDTree::GetObjectCount() const {

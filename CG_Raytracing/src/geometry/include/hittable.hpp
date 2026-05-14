@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <optional>
 
 #include <vec3.hpp>
 #include <ray.hpp>
@@ -19,7 +20,7 @@ namespace cg_raytracing::geometry {
 		static BoundingBox Create(math::Vec3 const& _center,
 			float _size_x, float _size_y, float _size_z) noexcept;
 
-		bool BBIntersect(BoundingBox const& _other) const noexcept;
+		std::optional<math::Vec3> BBIntersect(BoundingBox const& _other) const noexcept;
 
 		BoundingBox Union(BoundingBox const& _other) const noexcept;
 
@@ -29,9 +30,11 @@ namespace cg_raytracing::geometry {
 
 		float Volume() const noexcept;
 
-		bool RayIntersect(math::Ray const& _ray, 
+		std::optional<math::Vec3> RayIntersect(math::Ray const& _ray, 
 			float _t_min = 0.001f,
 			float _t_max = 1e9) const;
+
+		std::optional<math::Vec3> SphereIntersect(math::Vec3 const& _p, float _r) const;
 	};
 
 	class Hittable {
