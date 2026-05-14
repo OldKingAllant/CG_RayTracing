@@ -8,6 +8,7 @@
 #include <memory>
 #include <optional>
 #include <functional>
+#include <limits>
 
 namespace cg_raytracing::geometry {
 	struct KDNode {
@@ -58,6 +59,20 @@ namespace cg_raytracing::geometry {
 		std::vector<std::pair<FlatKDNode const*, math::Vec3>> RayIntersectsObjects(math::Ray const& _ray) const;
 
 		/// <summary>
+		/// Return N or all NN nodes centered at _p 
+		/// inside the radius _radius and their distance
+		/// from _p, ordered by distance from _p
+		/// </summary>
+		/// <param name="_p"></param>
+		/// <param name="_radius"></param>
+		/// <param name="_count"></param>
+		/// <returns></returns>
+		std::vector<std::pair<FlatKDNode const*, math::Vec3>> NearestNeighbours(
+			math::Vec3 const& _p, 
+			float _radius,
+			size_t _count = std::numeric_limits<size_t>::max()) const;
+
+		/// <summary>
 		/// Get total number of tracked objects in the BVH
 		/// </summary>
 		/// <returns>Number of objects</returns>
@@ -67,6 +82,38 @@ namespace cg_raytracing::geometry {
 		KDTree();
 		KDTree(KDTree const& _prev) = delete;
 		KDTree& operator=(KDTree const& _other) = delete;
+
+		enum class SearchType {
+			RAY,
+			SPHERE,
+			BBOX
+		};
+
+		// I'd like to use a union here,
+		// but the underlying types
+		// are not POD
+		struct SearchParams {
+			math::Ray ray;
+			math::Vec3 center;
+			float radius;
+			BoundingBox bbox;
+		};
+
+		/// <summary>
+		/// Perform search of bboxes intersecting one
+		/// of the selected object types. 
+		/// The type of intersection is based on
+		/// _SearchType
+		/// </summary>
+		/// <typeparam name="_SearchType">Type of search</typeparam>
+		/// <param name="_params">Search parameters (such as ray or bbox)</param>
+		/// <param name="_count">Max number of objects to return</param>
+		/// <returns>List of hit objecs and where they intersect</returns>
+		template <SearchType _SearchType>
+		std::vector<std::pair<FlatKDNode const*, math::Vec3>> SearchIntersections(
+			SearchParams const& _params,
+			size_t _count = std::numeric_limits<size_t>::max()
+		) const;
 
 	private :
 		std::vector<FlatKDNode> m_flat_tree;

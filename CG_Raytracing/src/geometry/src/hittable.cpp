@@ -33,13 +33,6 @@ namespace cg_raytracing::geometry {
 		return bb;
 	}
 
-	bool BoundingBox::BBIntersect(BoundingBox const& _other) const noexcept {
-		return !(
-			min_x > _other.max_x || max_x < _other.min_x ||
-			min_y > _other.max_y || max_y < _other.min_y ||
-			min_z > _other.max_z || max_z < _other.min_z);
-	}
-
 	BoundingBox BoundingBox::Union(BoundingBox const& _other) const noexcept {
 		BoundingBox bb{};
 		bb.min_x = std::fmin(min_x, _other.min_x);
@@ -118,5 +111,80 @@ namespace cg_raytracing::geometry {
 		}
 
 		return _ray.At(origins_inside_minmax != 3 ? t_enter : t_exit);
+	}
+
+	std::optional<math::Vec3> BoundingBox::SphereIntersect(
+		math::Vec3 const& _p, 
+		float _r) const {
+		auto squared = [](float v) { return v * v; };
+		
+		/*
+		for i=1,2,3:
+
+		if              c[i] < b_min[i]   then   p[i] = b_min[i]
+		if   b_min[i] < c[i] < b_max[i]   then   p[i] = c[i]
+		if   b_max[i] < c[i]              then   p[i] = b_max[i]
+		
+		if (p[1]-c[1])^2 + (p[2]-c[2])^2 + (p[3]-c[3])^2 < r^2 
+		then the box intersects the ball. 
+		
+		Otherwise the box doesn't intersect the ball
+		*/
+		const float mins[] = { min_x, min_y, min_z };
+		const float maxs[] = { max_x, max_y, max_z };
+
+		const float c[] = { _p.x, _p.y, _p.z };
+
+		float p[3] = {};
+
+		uint32_t origins_inside_minmax{};
+
+		// Find closest point on the cube wrt the center of the sphere
+		for (size_t i = 0; i < 3; i++) {
+			if (c[i] < mins[i]) p[i] = mins[i];
+			if (mins[i] < c[i] && c[i] < maxs[i]) { p[i] = c[i]; origins_inside_minmax++; }
+			if (maxs[i] < c[i]) p[i] = maxs[i];
+		}
+
+		auto distance_squared = squared(p[0] - c[0]) + squared(p[1] - c[1]) + squared(p[2] - c[2]);
+
+		if (distance_squared >= squared(_r) && (origins_inside_minmax != 3)) {
+			return std::nullopt;
+		}
+
+		auto hit_point = (origins_inside_minmax != 3) ? math::Vec3(p[0], p[1], p[2]) : _p;
+
+		return hit_point;
+	}
+
+	std::optional<math::Vec3> BoundingBox::BBIntersect(BoundingBox const& _other) const noexcept {
+		auto does_intersect = !(
+			min_x > _other.max_x || max_x < _other.min_x ||
+			min_y > _other.max_y || max_y < _other.min_y ||
+			min_z > _other.max_z || max_z < _other.min_z);
+
+		if (!does_intersect) {
+			return std::nullopt;
+		}
+
+		const float mins[] = { min_x, min_y, min_z };
+		const float maxs[] = { max_x, max_y, max_z };
+
+		const float c[] = { _other.pos.x, _other.pos.y, _other.pos.z };
+
+		float p[3] = {};
+
+		uint32_t origins_inside_minmax{};
+
+		// Find closest point on the cube wrt the center of the sphere
+		for (size_t i = 0; i < 3; i++) {
+			if (c[i] < mins[i]) p[i] = mins[i];
+			if (mins[i] < c[i] && c[i] < maxs[i]) { p[i] = c[i]; origins_inside_minmax++; }
+			if (maxs[i] < c[i]) p[i] = maxs[i];
+		}
+
+		auto hit_point = (origins_inside_minmax != 3) ? math::Vec3(p[0], p[1], p[2]) : _other.pos;
+
+		return hit_point;
 	}
 }

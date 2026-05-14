@@ -86,4 +86,24 @@ TEST_CASE("KD Tree tests") {
 
 		REQUIRE(kd_tree.GetObjectCount() == NUM_CUBES);
 	}
+
+	SECTION("Single object KNN") {
+		using Cube = cg_raytracing::geometry::Cube;
+		using Hittable = cg_raytracing::geometry::Hittable;
+		using Vec3 = cg_raytracing::math::Vec3;
+		using Ray = cg_raytracing::math::Ray;
+
+		std::vector<std::shared_ptr<Hittable>> objects{};
+		auto material = cg_raytracing::geometry::Material::Diffuse({});
+		objects.push_back(std::make_shared<Cube>(Vec3(.0f, .0f, .0f), 5.f, material));
+
+		auto kd_tree = cg_raytracing::geometry::KDTree::CreateFromHittables(objects, 50.f);
+
+		auto knn = kd_tree.NearestNeighbours(Vec3(.0f, .0f, .0f), 2.5f);
+		REQUIRE(knn.size() == 1);
+		knn = kd_tree.NearestNeighbours(Vec3(6.0f, 6.0f, 6.0f), 3.f);
+		REQUIRE(knn.size() == 1);
+		knn = kd_tree.NearestNeighbours(Vec3(8.0f, 8.0f, 8.0f), 3.f);
+		REQUIRE(knn.size() == 0);
+	}
 }
