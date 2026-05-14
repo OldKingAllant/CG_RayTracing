@@ -106,4 +106,57 @@ TEST_CASE("KD Tree tests") {
 		knn = kd_tree.NearestNeighbours(Vec3(8.0f, 8.0f, 8.0f), 3.f);
 		REQUIRE(knn.size() == 0);
 	}
+
+	SECTION("Four object KNN") {
+		using Cube = cg_raytracing::geometry::Cube;
+		using Hittable = cg_raytracing::geometry::Hittable;
+		using Vec3 = cg_raytracing::math::Vec3;
+		using Ray = cg_raytracing::math::Ray;
+
+		std::vector<std::shared_ptr<Hittable>> objects{};
+		auto material = cg_raytracing::geometry::Material::Diffuse({});
+		objects.push_back(std::make_shared<Cube>(Vec3(.0f, .0f, .0f), 2.5f, material));
+		objects.push_back(std::make_shared<Cube>(Vec3(10.0f, .0f, .0f), 2.5f, material));
+
+		objects.push_back(std::make_shared<Cube>(Vec3(.0f, .0f, 10.0f), 2.5f, material));
+		objects.push_back(std::make_shared<Cube>(Vec3(10.0f, .0f, 10.0f), 2.5f, material));
+
+		auto kd_tree = cg_raytracing::geometry::KDTree::CreateFromHittables(objects, 50.f);
+
+		auto knn = kd_tree.NearestNeighbours(Vec3(6.0f, 6.0f, 6.0f), 5.f);
+		REQUIRE(knn.size() == 1);
+		REQUIRE(knn[0].first->obj_index.value() == 3);
+		knn = kd_tree.NearestNeighbours(Vec3(6.0f, 6.0f, 6.0f), 7.f);
+		REQUIRE(knn.size() == 4);
+		REQUIRE(knn[0].first->obj_index.value() == 3);
+		REQUIRE(knn[1].first->obj_index.value() == 1);
+		REQUIRE(knn[2].first->obj_index.value() == 2);
+		REQUIRE(knn[3].first->obj_index.value() == 0);
+
+		knn = kd_tree.NearestNeighbours(Vec3(5.0f, 0.0f, 0.0f), 3.f);
+		REQUIRE(knn.size() == 2);
+		REQUIRE(knn[0].first->obj_index.value() == 0);
+		REQUIRE(knn[1].first->obj_index.value() == 1);
+
+		knn = kd_tree.NearestNeighbours(Vec3(0.0f, 0.0f, 5.0f), 3.f);
+		REQUIRE(knn.size() == 2);
+		REQUIRE(knn[0].first->obj_index.value() == 0);
+		REQUIRE(knn[1].first->obj_index.value() == 2);
+
+		knn = kd_tree.NearestNeighbours(Vec3(10.0f, 0.0f, 5.0f), 3.f);
+		REQUIRE(knn.size() == 2);
+		REQUIRE(knn[0].first->obj_index.value() == 1);
+		REQUIRE(knn[1].first->obj_index.value() == 3);
+
+		knn = kd_tree.NearestNeighbours(Vec3(5.0f, 0.0f, 10.0f), 3.f);
+		REQUIRE(knn.size() == 2);
+		REQUIRE(knn[0].first->obj_index.value() == 2);
+		REQUIRE(knn[1].first->obj_index.value() == 3);
+
+		knn = kd_tree.NearestNeighbours(Vec3(0.0f, 0.0f, 10.0f), 2.5f);
+		REQUIRE(knn.size() == 1);
+		REQUIRE(knn[0].first->obj_index.value() == 2);
+	}
+
+	// TODO: Ray intersections with more than one object
 }

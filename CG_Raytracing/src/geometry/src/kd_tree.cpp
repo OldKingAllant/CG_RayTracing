@@ -501,8 +501,8 @@ namespace cg_raytracing::geometry {
 				// Compute distance from origin of 
 				// ray/sphere/bbox
 				auto distance = (hit_coord - _p).length();
-				// Append the distance, obj index and point of intersection
-				unordered_nodes.push_back({ distance, node.obj_index.value(), hit_coord });
+				// Append the distance, node index and point of intersection
+				unordered_nodes.push_back({ distance, curr_node_index, hit_coord });
 
 				if (MAX_COUNT_VALUE != _count) { // If the KNN is bound
 					--_count; // Check if we have reached the limit
