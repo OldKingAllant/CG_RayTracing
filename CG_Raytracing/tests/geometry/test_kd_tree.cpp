@@ -5,6 +5,7 @@
 
 #include <vector>
 #include <memory>
+#include <random>
 
 #include <catch2/catch_approx.hpp>
 #include <catch2/catch_assertion_result.hpp>
@@ -19,7 +20,7 @@ TEST_CASE("KD Tree tests") {
 
 		std::vector<std::shared_ptr<Hittable>> objects{};
 		auto material = cg_raytracing::geometry::Material::Diffuse({});
-		objects.push_back(std::make_shared<Cube>(Vec3(.0f, .0f, .0f), 10.f, material));
+		objects.push_back(std::make_shared<Cube>(Vec3(.0f, .0f, .0f), 5.f, material));
 
 		auto kd_tree = cg_raytracing::geometry::KDTree::CreateFromHittables(objects, 50.f);
 
@@ -50,5 +51,39 @@ TEST_CASE("KD Tree tests") {
 		// Test pos xyz towards neg xyz
 		intersected = kd_tree.RayIntersectsObjects(Ray(Vec3(20.f, 20.0f, 20.0f), Vec3(-1.f, -1.0f, -1.0f)));
 		REQUIRE(intersected.size() == 1);
+	}
+
+	SECTION("Random objects") {
+		std::random_device rd;
+		std::mt19937 gen(rd()); 
+
+		const float MIN = 10.f;
+		const float MAX = 90.f;
+		std::uniform_real_distribution<float> generator_x{MIN, MAX};
+		std::uniform_real_distribution<float> generator_y{MIN, MAX};
+		std::uniform_real_distribution<float> generator_z{MIN, MAX};
+
+		const size_t NUM_CUBES = 1000;
+
+		using Cube = cg_raytracing::geometry::Cube;
+		using Hittable = cg_raytracing::geometry::Hittable;
+		using Vec3 = cg_raytracing::math::Vec3;
+		using Ray = cg_raytracing::math::Ray;
+
+		auto material = cg_raytracing::geometry::Material::Diffuse({});
+
+		const float HALF_SIZE = 2.5f;
+
+		std::vector<std::shared_ptr<Hittable>> objects{};
+		for (size_t i = 0; i < NUM_CUBES; i++) {
+			auto pos_x = generator_x(gen);
+			auto pos_y = generator_y(gen);
+			auto pos_z = generator_z(gen);
+			objects.push_back(std::make_shared<Cube>(Vec3(pos_x, pos_y, pos_z), HALF_SIZE, material));
+		}
+
+		auto kd_tree = cg_raytracing::geometry::KDTree::CreateFromHittables(objects, 200.f);
+
+		REQUIRE(kd_tree.GetObjectCount() == NUM_CUBES);
 	}
 }

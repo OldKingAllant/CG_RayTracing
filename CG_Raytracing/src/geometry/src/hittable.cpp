@@ -74,7 +74,7 @@ namespace cg_raytracing::geometry {
 		return SizeX() * SizeY() * SizeZ();
 	}
 
-	bool BoundingBox::RayIntersect(math::Ray const& _ray,
+	std::optional<math::Vec3> BoundingBox::RayIntersect(math::Ray const& _ray,
 		float _t_min,
 		float _t_max) const {
 		float t_enter = _t_min;
@@ -108,9 +108,15 @@ namespace cg_raytracing::geometry {
 			t_exit = std::min(t_exit, t1);
 
 			if (t_exit <= t_enter)
-				return false;
+				return std::nullopt;
 		}
 
-		return (origins_inside_minmax == 3) || (_t_min < t_enter && t_enter < _t_max);
+		auto does_hit = (origins_inside_minmax == 3) || (_t_min < t_enter && t_enter < _t_max);
+
+		if (!does_hit) {
+			return std::nullopt;
+		}
+
+		return _ray.At(origins_inside_minmax != 3 ? t_enter : t_exit);
 	}
 }

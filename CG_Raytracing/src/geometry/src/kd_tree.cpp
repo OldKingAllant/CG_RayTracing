@@ -7,6 +7,7 @@
 #include <stdexcept>
 #include <unordered_set>
 #include <deque>
+#include <tuple>
 
 namespace cg_raytracing::geometry {
 	namespace detail {
@@ -443,20 +444,25 @@ namespace cg_raytracing::geometry {
 		}
 	}
 
-	std::vector<FlatKDNode const*> KDTree::RayIntersectsObjects(math::Ray const& _ray) const {
-		std::vector<FlatKDNode const*> intersected_nodes{};
+	std::vector<std::pair<FlatKDNode const*, math::Vec3>> KDTree::RayIntersectsObjects(math::Ray const& _ray) const {
+		// Having O the origin of the ray and P the point of intersection with a bbox
+		// And D = |P - O|
+		// Contains a list of (D, OBJ_INDEX, P)
+		std::vector<std::tuple<float, size_t, math::Vec3>> unordered_nodes{};
 
 		std::stack<size_t> nodes_to_visit{};
 		nodes_to_visit.push(0);
+
+		auto ray_origin = _ray.m_origin;
 
 		while (!nodes_to_visit.empty()) {
 			auto curr_node_index = nodes_to_visit.top();
 			nodes_to_visit.pop();
 
 			auto const& node = m_flat_tree[curr_node_index];
-			auto does_intersect = node.bbox.RayIntersect(_ray);
+			auto intersection_point = node.bbox.RayIntersect(_ray);
 
-			if (!does_intersect) {
+			if (!intersection_point.has_value()) {
 				// Ray does not intersect this node
 				// The underlying nodes cannot
 				// be intersected, go to the next
@@ -467,7 +473,10 @@ namespace cg_raytracing::geometry {
 			if (node.obj_index.has_value()) {
 				// Intersected node is leaf,
 				// add to the list
-				intersected_nodes.push_back(&node);
+				auto hit_coord = intersection_point.value();
+				auto distance = (hit_coord - ray_origin).length();
+				unordered_nodes.push_back({ distance, node.obj_index.value(), hit_coord });
+				// intersected_nodes.push_back(&node);
 				continue;
 			}
 
@@ -480,6 +489,19 @@ namespace cg_raytracing::geometry {
 			if (node.left.has_value()) {
 				nodes_to_visit.push(node.left.value());
 			}
+		}
+
+		// Order by increasing distance from the origin of the ray
+		std::sort(unordered_nodes.begin(), unordered_nodes.end(), [](auto const& _l, auto const& _r) {
+			return std::get<0>(_r) > std::get<0>(_l);
+		});
+
+		std::vector<std::pair<FlatKDNode const*, math::Vec3>> intersected_nodes{};
+		intersected_nodes.resize(unordered_nodes.size());
+
+		for (size_t o_index = 0; auto const& hit_info : unordered_nodes) {
+			intersected_nodes[o_index] = { &m_flat_tree[std::get<1>(hit_info)], std::get<2>(hit_info) };
+			o_index++;
 		}
 
 		return intersected_nodes;

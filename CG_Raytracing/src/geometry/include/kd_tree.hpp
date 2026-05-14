@@ -2,6 +2,7 @@
 
 #include <hittable.hpp>
 #include <ray.hpp>
+#include <vec3.hpp>
 
 #include <vector>
 #include <memory>
@@ -47,11 +48,14 @@ namespace cg_raytracing::geometry {
 		void VisitBSF(std::function<void(FlatKDNode const&)>&& _fun) const;
 
 		/// <summary>
-		/// Return list of leaf nodes that the ray intersects
+		/// Return list of leaf nodes that the ray intersects, 
+		/// together with the point where the ray and the point
+		/// where they intersect, order by the distance from 
+		/// the origin of the ray
 		/// </summary>
 		/// <param name="_ray">The ray</param>
-		/// <returns>List of nodes</returns>
-		std::vector<FlatKDNode const*> RayIntersectsObjects(math::Ray const& _ray) const;
+		/// <returns>List of nodes + hit points</returns>
+		std::vector<std::pair<FlatKDNode const*, math::Vec3>> RayIntersectsObjects(math::Ray const& _ray) const;
 
 		/// <summary>
 		/// Get total number of tracked objects in the BVH
