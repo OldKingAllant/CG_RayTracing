@@ -1,5 +1,6 @@
 #include <kd_tree.hpp>
 #include <hittable.hpp>
+#include <hit_record.hpp>
 
 #include <memory>
 #include <vector>
@@ -33,6 +34,10 @@ namespace cg_raytracing::scene {
 		/// </summary>
 		/// <returns>The bbox</returns>
 		geometry::BoundingBox GetBoundingBox() const override;
+
+		std::optional<geometry::HitRecord> Hit(const math::Ray& _ray,
+			float _t_min = TMIN,
+			float _t_max = TMAX) const override;
 
 		/// <summary>
 		/// Add single object to the hierarchy. Remember to call 

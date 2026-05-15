@@ -4,25 +4,29 @@
 #include "material.hpp"
 #include "ray.hpp"
 #include "vec3.hpp"
+#include <hittable.hpp>
+
 #include <optional>
 
 namespace cg_raytracing::geometry {
 
-class Triangle {
-public:
-    cg_raytracing::math::Vec3 m_v0;
-    cg_raytracing::math::Vec3 m_v1;
-    cg_raytracing::math::Vec3 m_v2;
-    const Material*           m_material;
+    class Triangle : public Hittable {
+    public:
+        cg_raytracing::math::Vec3 m_v0;
+        cg_raytracing::math::Vec3 m_v1;
+        cg_raytracing::math::Vec3 m_v2;
+        const Material*           m_material;
+    
+        Triangle(cg_raytracing::math::Vec3 _v0,
+                 cg_raytracing::math::Vec3 _v1,
+                 cg_raytracing::math::Vec3 _v2,
+                 const Material*           _material);
+    
+        std::optional<HitRecord> Hit(const cg_raytracing::math::Ray& _ray,
+                                     float _t_min = TMIN,
+                                     float _t_max = TMAX) const override;
 
-    Triangle(cg_raytracing::math::Vec3 _v0,
-             cg_raytracing::math::Vec3 _v1,
-             cg_raytracing::math::Vec3 _v2,
-             const Material*           _material);
-
-    std::optional<HitRecord> Hit(const cg_raytracing::math::Ray& _ray,
-                                 float _t_min = 0.001f,
-                                 float _t_max = 1e9f) const;
-};
+        BoundingBox GetBoundingBox() const override;
+    };
 
 } // namespace cg_raytracing::geometry

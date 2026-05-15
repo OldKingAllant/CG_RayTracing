@@ -20,6 +20,8 @@ namespace cg_raytracing::scene {
 		m_objects = std::move(_other.m_objects);
 		m_kd_tree = std::move(_other.m_kd_tree);
 		m_update_tree = _other.m_update_tree;
+
+		return *this;
 	}
 
 	World World::CreateEmpty(float _world_size) {
@@ -31,6 +33,10 @@ namespace cg_raytracing::scene {
 	geometry::BoundingBox World::GetBoundingBox() const {
 		if (m_objects.empty() || !m_kd_tree) return {};
 		return m_kd_tree->GetTopLevelBoundingBox();
+	}
+
+	std::optional<geometry::HitRecord> World::Hit(const math::Ray& _ray, float _t_min, float _t_max) const {
+		return std::nullopt;
 	}
 
 	std::optional<WorldError> World::AddObject(std::shared_ptr<geometry::Hittable> _obj) {
