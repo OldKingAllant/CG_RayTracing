@@ -5,7 +5,7 @@
 #include "sphere.hpp"
 #include "triangle.hpp"
 #include "vec3.hpp"
-#include "PointLight.hpp"
+#include "point_light.hpp"
 #include <algorithm>
 
 
@@ -64,7 +64,9 @@ void Camera::Translate(const math::Vec3 &_translation_vector) {
     }
 }
 
-void Camera::BurstRays(cg_raytracing::scene::PointLight& light) {
+void Camera::BurstRays(cg_raytracing::scene::PointLight& light,
+                        const geometry::KDTree* kdtree,
+                        const std::vector<std::shared_ptr<geometry::Hittable>>* hittables) {
 
     // Materials
     geometry::Material mat_sphere =
@@ -121,6 +123,18 @@ void Camera::BurstRays(cg_raytracing::scene::PointLight& light) {
             } else if (hit_cube) {
 
                 hit = hit_cube;
+            }
+
+            if (kdtree && hittables) {
+                auto candidates = kdtree->RayIntersectsObjects(ray);
+                for (auto& [node, point] : candidates) {
+                    if (!node->obj_index.has_value()) continue;
+                    auto hit_candidate = (*hittables)[node->obj_index.value()]->Hit(ray);
+                    if (hit_candidate) {
+                        if (!hit || hit_candidate->m_t < hit->m_t)
+                            hit = hit_candidate;
+                    }
+                }
             }
 
             // Shading
