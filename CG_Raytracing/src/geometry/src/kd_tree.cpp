@@ -353,6 +353,12 @@ namespace cg_raytracing::geometry {
 		return kd_tree;
 	}
 
+	std::unique_ptr<KDTree> KDTree::CreateUniqueFromHittables(std::vector<std::shared_ptr<Hittable>> const& _hittables, float _world_size) {
+		auto ptr = std::make_unique<KDTree>();
+		*ptr = CreateFromHittables(_hittables, _world_size);
+		return ptr;
+	}
+
 	void KDTree::VisitDSF(std::function<void(FlatKDNode const&)>&& _fun, bool _leafs_only) const {
 		std::stack<size_t> nodes_to_visit{};
 		std::unordered_set<size_t> visited_nodes{};
@@ -568,6 +574,10 @@ namespace cg_raytracing::geometry {
 		size_t object_count{};
 		VisitDSF([&object_count](auto const& _node) { object_count++; }, true);
 		return object_count;
+	}
+
+	BoundingBox KDTree::GetTopLevelBoundingBox() const {
+		return m_flat_tree[0].bbox;
 	}
 
 	KDTree::KDTree() :
