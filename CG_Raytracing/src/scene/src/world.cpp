@@ -31,11 +31,35 @@ namespace cg_raytracing::scene {
 	}
 
 	geometry::BoundingBox World::GetBoundingBox() const {
-		if (m_objects.empty() || !m_kd_tree) return {};
+		if (m_objects.empty() || !m_kd_tree) { 
+			return {}; 
+		}
 		return m_kd_tree->GetTopLevelBoundingBox();
 	}
 
 	std::optional<geometry::HitRecord> World::Hit(const math::Ray& _ray, float _t_min, float _t_max) const {
+		if (0 == m_objects.size()) { 
+			return std::nullopt; 
+		}
+		if (!m_kd_tree) {
+			return std::nullopt;
+		}
+		
+		auto intersected_nodes = m_kd_tree->RayIntersectsObjects(_ray);
+		if (0 == intersected_nodes.size()) { 
+			return std::nullopt; 
+		}
+
+		// List of intersected nodes is already ordered by distance from the origin
+		// Pick the first object that is truly hit by the ray
+
+		for (auto [node_ref, point] : intersected_nodes) {
+			auto hit_record = m_objects[node_ref->obj_index.value()]->Hit(_ray, _t_min, _t_max);
+			if (hit_record.has_value()) {
+				return hit_record;
+			}
+		}
+
 		return std::nullopt;
 	}
 
@@ -61,9 +85,13 @@ namespace cg_raytracing::scene {
 	}
 
 	void World::UpdateTree() {
-		if (!m_update_tree) return;
+		if (!m_update_tree) {
+			return;
+		}
 		m_update_tree = false;
-		if (0 == m_objects.size()) return;
+		if (0 == m_objects.size()) {
+			return;
+		}
 
 		m_kd_tree = geometry::KDTree::CreateUniqueFromHittables(m_objects, m_world_size);
 	}
