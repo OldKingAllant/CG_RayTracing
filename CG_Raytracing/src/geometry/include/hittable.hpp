@@ -5,6 +5,7 @@
 
 #include <vec3.hpp>
 #include <ray.hpp>
+#include <hit_record.hpp>
 
 namespace cg_raytracing::geometry {
 	struct BoundingBox {
@@ -39,6 +40,13 @@ namespace cg_raytracing::geometry {
 
 	class Hittable {
 	public :
+		static constexpr float TMIN = 0.001f;
+		static constexpr float TMAX = 1e9;
+
 		virtual BoundingBox GetBoundingBox() const = 0;
+
+		virtual std::optional<HitRecord> Hit(const math::Ray& _ray,
+			float _t_min = TMIN,
+			float _t_max = TMAX) const = 0;
 	};
 }

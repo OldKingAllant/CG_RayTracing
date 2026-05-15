@@ -19,8 +19,8 @@ public:
     Sphere(cg_raytracing::math::Vec3 _center, float _radius, Material _material);
 
     std::optional<HitRecord> Hit(const cg_raytracing::math::Ray& _ray,
-                                 float _t_min = 0.001f,
-                                 float _t_max = 1e9f) const;
+                                 float _t_min = TMIN,
+                                 float _t_max = TMAX) const override;
 
     BoundingBox GetBoundingBox() const override;
 };

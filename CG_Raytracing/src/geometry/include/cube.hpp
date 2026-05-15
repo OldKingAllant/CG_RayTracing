@@ -22,8 +22,8 @@ namespace cg_raytracing::geometry {
         Cube(math::Vec3 _center, float _half_size, Material _material);
     
         std::optional<HitRecord> Hit(const math::Ray& _ray,
-                                     float _t_min = 0.001f,
-                                     float _t_max = 1e9f) const;
+            float _t_min = TMIN,
+            float _t_max = TMAX) const override;
 
         BoundingBox GetBoundingBox() const override;
     
