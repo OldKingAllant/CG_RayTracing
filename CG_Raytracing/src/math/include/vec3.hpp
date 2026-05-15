@@ -8,6 +8,8 @@ class Vec3 {
     float x, y, z;
     Vec3(float _x = 0.0, float _y = 0.0, float _z = 0.0) : x(_x), y(_y), z(_z) {};
 
+    Vec3 operator-() const;
+
     Vec3 operator*(const Vec3& _other) const;
 
     Vec3 operator+(const Vec3 &_other) const;
