@@ -2,6 +2,7 @@
 //
 
 #include "CG_Raytracing.h"
+#include "obj_loader.hpp"
 #include "vec3.hpp"
 
 #include <SDL3/SDL_assert.h>
@@ -133,6 +134,9 @@ void HandleKeyDown(SDL_Event &_ev,
 }
 
 int main() {
+    // just some random testing
+    // cg_raytracing::geometry::LoadFromObj("../../assets/Treno.obj");
+
     using Camera = cg_raytracing::scene::Camera;
     std::unique_ptr<Camera> my_camera = std::make_unique<Camera>();
 

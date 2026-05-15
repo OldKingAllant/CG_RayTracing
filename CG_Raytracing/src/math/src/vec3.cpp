@@ -1,6 +1,7 @@
 #include "vec3.hpp"
 #include <cmath>
 #include <stdexcept>
+
 using namespace cg_raytracing::math;
 
 Vec3 cg_raytracing::math::Vec3::operator-() const {

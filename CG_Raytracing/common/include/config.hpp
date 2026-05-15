@@ -7,7 +7,7 @@ inline constexpr uint32_t IMAGE_WIDTH = 160;
 inline constexpr uint32_t IMAGE_HEIGHT =
     static_cast<uint32_t>(IMAGE_WIDTH / ASPECT_RATIO);
 
-inline constexpr uint32_t FOCAL_LENGTH = 50; // focal length in mm
+inline constexpr uint32_t FOCAL_LENGTH = 50; // focal length in m
 inline constexpr float SENSOR_SIZE_WIDTH =
     36.0; // sensor size in mm (36 is full-frame)
 
