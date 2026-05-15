@@ -1,0 +1,64 @@
+#include <world.hpp>
+
+namespace cg_raytracing::scene {
+	World::World() :
+		m_world_size{},
+		m_objects{},
+		m_kd_tree{},
+		m_update_tree{}
+	{ }
+
+	World::World(World&& _prev) noexcept:
+		m_world_size{_prev.m_world_size},
+		m_objects{std::move(_prev.m_objects)},
+		m_kd_tree{std::move(_prev.m_kd_tree)},
+		m_update_tree{_prev.m_update_tree}
+	{}
+
+	World& World::operator=(World && _other) noexcept {
+		m_world_size = _other.m_world_size;
+		m_objects = std::move(_other.m_objects);
+		m_kd_tree = std::move(_other.m_kd_tree);
+		m_update_tree = _other.m_update_tree;
+	}
+
+	World World::CreateEmpty(float _world_size) {
+		auto world = World();
+		world.m_world_size = _world_size;
+		return world;
+	}
+
+	geometry::BoundingBox World::GetBoundingBox() const {
+		if (m_objects.empty() || !m_kd_tree) return {};
+		return m_kd_tree->GetTopLevelBoundingBox();
+	}
+
+	std::optional<WorldError> World::AddObject(std::shared_ptr<geometry::Hittable> _obj) {
+		auto bbox = _obj->GetBoundingBox();
+		auto half_size = m_world_size / 2.f;
+		auto is_out_of_bouns = (
+			bbox.min_x <= half_size ||
+			bbox.max_x >= half_size ||
+
+			bbox.min_y <= half_size ||
+			bbox.max_y >= half_size ||
+
+			bbox.min_z <= half_size ||
+			bbox.max_z >= half_size
+		);
+		if (is_out_of_bouns) {
+			return WorldError::OUT_OF_BOUNDS;
+		}
+		m_objects.push_back(_obj);
+		m_update_tree = true;
+		return std::nullopt;
+	}
+
+	void World::UpdateTree() {
+		if (!m_update_tree) return;
+		m_update_tree = false;
+		if (0 == m_objects.size()) return;
+
+		m_kd_tree = geometry::KDTree::CreateUniqueFromHittables(m_objects, m_world_size);
+	}
+}

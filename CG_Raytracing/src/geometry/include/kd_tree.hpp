@@ -35,6 +35,9 @@ namespace cg_raytracing::geometry {
 
 		static KDTree CreateFromHittables(std::vector<std::shared_ptr<Hittable>> const& _hittables, float _world_size);
 
+		static std::unique_ptr<KDTree> CreateUniqueFromHittables(std::vector<std::shared_ptr<Hittable>> const& _hittables, 
+			float _world_size);
+
 		/// <summary>
 		/// Visit all nodes depth-search-first 
 		/// </summary>
@@ -78,8 +81,14 @@ namespace cg_raytracing::geometry {
 		/// <returns>Number of objects</returns>
 		size_t GetObjectCount() const;
 
-	private :
+		BoundingBox GetTopLevelBoundingBox() const;
+
+		/// <summary>
+		/// USE ONLY IF NECESSARY
+		/// </summary>
 		KDTree();
+
+	private :
 		KDTree(KDTree const& _prev) = delete;
 		KDTree& operator=(KDTree const& _other) = delete;
 
