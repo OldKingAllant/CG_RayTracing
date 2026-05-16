@@ -1,3 +1,5 @@
+#pragma once
+
 #include <kd_tree.hpp>
 #include <hittable.hpp>
 #include <hit_record.hpp>
@@ -52,6 +54,10 @@ namespace cg_raytracing::scene {
 		/// calling other methods
 		/// </summary>
 		void UpdateTree();
+
+		inline std::vector<std::shared_ptr<geometry::Hittable>> const& GetObjects() const {
+			return m_objects;
+		}
 
 	private :
 		World();

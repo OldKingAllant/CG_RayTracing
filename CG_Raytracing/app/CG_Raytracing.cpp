@@ -2,21 +2,26 @@
 //
 
 #include "CG_Raytracing.h"
-#include "vec3.hpp"
-#include "kd_tree.hpp"
-#include "hittable.hpp"
-#include "triangle.hpp"
-#include <SDL3/SDL_assert.h>
+
+#include <vec3.hpp>
+#include <kd_tree.hpp>
+#include <hittable.hpp>
+#include <triangle.hpp>
+#include <sphere.hpp>
+#include <cube.hpp>
 #include <camera.hpp>
 #include <config.hpp>
-#include <GL/glew.h>
-#include <SDL3/SDL.h>
 #include <GLContext.hpp>
 #include <IndexBuffer.hpp>
 #include <Shader.hpp>
 #include <Texture2D.hpp>
 #include <VertexBuffer.hpp>
 #include <point_light.hpp>
+#include <world.hpp>
+
+#include <GL/glew.h>
+#include <SDL3/SDL.h>
+#include <SDL3/SDL_assert.h>
 #include <bit>
 #include <ctime>
 #include <filesystem>
@@ -60,76 +65,53 @@ void HandleKeyDown(SDL_Event &_ev,
                    std::unique_ptr<cg_raytracing::scene::Camera> &_my_camera,
                    cg_raytracing::scene::PointLight &_light,
                    cg_raytracing::Texture2D &_tex,
-                   cg_raytracing::geometry::KDTree* _kdtree,
-                   std::vector<std::shared_ptr<cg_raytracing::geometry::Hittable>>& _hittables) {
+                   cg_raytracing::scene::World const& _world,
+                   std::vector<std::shared_ptr<cg_raytracing::geometry::Hittable>> const& _hittables) {
     SDL_assert(_ev.type == SDL_EVENT_KEY_DOWN);
+    auto must_update = false;
     switch (_ev.key.scancode) {
     case SDL_SCANCODE_W:
         _my_camera->Rotate(cg_raytracing::math::Vec3(0.02, 0.0, 0.0));
-        _my_camera->BurstRays(_light, _kdtree, &_hittables);
-        _tex.CopyFromBuffer(_my_camera->m_img_buf.data(), 0, 0, 0,
-                            _tex.GetWidth(), _tex.GetHeight(),
-                            cg_raytracing::PixelFormat::RGB,
-                            cg_raytracing::PixelDataType::UNSIGNED_BYTE);
+        must_update = true;
         break;
     case SDL_SCANCODE_A:
         _my_camera->Rotate(cg_raytracing::math::Vec3(0.0, -0.02, 0.0));
-        _my_camera->BurstRays(_light, _kdtree, &_hittables);
-        _tex.CopyFromBuffer(_my_camera->m_img_buf.data(), 0, 0, 0,
-                            _tex.GetWidth(), _tex.GetHeight(),
-                           cg_raytracing::PixelFormat::RGB,
-                           cg_raytracing::PixelDataType::UNSIGNED_BYTE);
+        must_update = true;
         break;
     case SDL_SCANCODE_S:
         _my_camera->Rotate(cg_raytracing::math::Vec3(-0.02, 0.0, 0.0));
-        _my_camera->BurstRays(_light, _kdtree, &_hittables);
-        _tex.CopyFromBuffer(_my_camera->m_img_buf.data(), 0, 0, 0,
-                            _tex.GetWidth(), _tex.GetHeight(),
-                            cg_raytracing::PixelFormat::RGB,
-                            cg_raytracing::PixelDataType::UNSIGNED_BYTE);
+        must_update = true;
         break;
     case SDL_SCANCODE_D:
         _my_camera->Rotate(cg_raytracing::math::Vec3(0.0, 0.02, 0.0));
-        _my_camera->BurstRays(_light, _kdtree, &_hittables);
-        _tex.CopyFromBuffer(_my_camera->m_img_buf.data(), 0, 0, 0,
-                           _tex.GetWidth(), _tex.GetHeight(),
-                           cg_raytracing::PixelFormat::RGB,
-                           cg_raytracing::PixelDataType::UNSIGNED_BYTE);
+        must_update = true;
         break;
     case SDL_SCANCODE_J:
         _light.m_position.z -= 50.0f;
-        _my_camera->BurstRays(_light, _kdtree, &_hittables);
-        _tex.CopyFromBuffer(_my_camera->m_img_buf.data(), 0, 0, 0,
-                        _tex.GetWidth(), _tex.GetHeight(),
-                        cg_raytracing::PixelFormat::RGB,
-                        cg_raytracing::PixelDataType::UNSIGNED_BYTE);
+        must_update = true;
         break;
     case SDL_SCANCODE_U:
         _light.m_position.z += 50.0f;
-        _my_camera->BurstRays(_light, _kdtree, &_hittables);
-        _tex.CopyFromBuffer(_my_camera->m_img_buf.data(), 0, 0, 0,
-                        _tex.GetWidth(), _tex.GetHeight(),
-                        cg_raytracing::PixelFormat::RGB,
-                        cg_raytracing::PixelDataType::UNSIGNED_BYTE);
+        must_update = true;
         break;
     case SDL_SCANCODE_K:
         _light.m_position.x += 50.0f;
-        _my_camera->BurstRays(_light, _kdtree, &_hittables);
-        _tex.CopyFromBuffer(_my_camera->m_img_buf.data(), 0, 0, 0,
-                        _tex.GetWidth(), _tex.GetHeight(),
-                        cg_raytracing::PixelFormat::RGB,
-                        cg_raytracing::PixelDataType::UNSIGNED_BYTE);
+        must_update = true;
         break;
     case SDL_SCANCODE_H:
         _light.m_position.x -= 50.0f;
-        _my_camera->BurstRays(_light, _kdtree, &_hittables);
-        _tex.CopyFromBuffer(_my_camera->m_img_buf.data(), 0, 0, 0,
-                        _tex.GetWidth(), _tex.GetHeight(),
-                        cg_raytracing::PixelFormat::RGB,
-                        cg_raytracing::PixelDataType::UNSIGNED_BYTE);
+        must_update = true;
         break;
     default:
         break;
+    }
+
+    if (must_update) {
+        _my_camera->BurstRays(_light, _world);
+        _tex.CopyFromBuffer(_my_camera->m_img_buf.data(), 0, 0, 0,
+            _tex.GetWidth(), _tex.GetHeight(),
+            cg_raytracing::PixelFormat::RGB,
+            cg_raytracing::PixelDataType::UNSIGNED_BYTE);
     }
 }
 
@@ -284,18 +266,35 @@ int main() {
         1.5f
     );
 
-    
-    std::vector<std::shared_ptr<cg_raytracing::geometry::Hittable>> hittables;
+    using Hittable = cg_raytracing::geometry::Hittable;
+    using World = cg_raytracing::scene::World;
+    using Material = cg_raytracing::geometry::Material;
+    using Sphere = cg_raytracing::geometry::Sphere;
+    using Cube = cg_raytracing::geometry::Cube;
+    using Vec3 = cg_raytracing::math::Vec3;
+
+    std::vector<std::shared_ptr<Hittable>> hittables;
     // Filippo qua va inserito il loader:
+    // Uhmm, questo richide che il loader ritorni
+    // una classe Mesh derivata da Hittable
+    // che implementi i metodi richiesti
     // hittables = ObjLoader::Load("model.obj", &mat);
 
-    std::unique_ptr<cg_raytracing::geometry::KDTree> kdtree;
-    if (!hittables.empty()) {
-        kdtree = cg_raytracing::geometry::KDTree::CreateUniqueFromHittables(hittables, 1000.0f);
-    }
+    Material mat_sphere =
+        Material::Diffuse({ 0.7f, 0.2f, 0.2f });
 
-    my_camera->BurstRays(light, kdtree.get(), &hittables);
+    Material mat_cube =
+        Material::Metal({ 0.2f, 0.2f, 0.8f }, 0.5f);
 
+    auto world = World::CreateEmpty(1000.f);
+
+    world.AddObject(std::make_shared<Sphere>(Vec3(-40.0f, 0.0f, 200.0f), 30.f, mat_sphere));
+    world.AddObject(std::make_shared<Cube>(Vec3(40.0f, 0.0f, 200.0f), 20.f, mat_cube));
+    world.AddObject(std::make_shared<Sphere>(Vec3(0.0f, 0.0f, 250.0f), 20.f, mat_cube));
+
+    world.UpdateTree();
+
+    my_camera->BurstRays(light, world);
 
 
     tex.CopyFromBuffer(my_camera->m_img_buf.data(), 0, 0, 0, tex.GetWidth(),
@@ -309,7 +308,7 @@ int main() {
         while (SDL_PollEvent(&ev)) {
             switch (ev.type) {
             case SDL_EVENT_KEY_DOWN:
-                HandleKeyDown(ev, my_camera, light, tex, kdtree.get(), hittables);
+                HandleKeyDown(ev, my_camera, light, tex, world, hittables);
                 break;
             case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
                 close = true;
