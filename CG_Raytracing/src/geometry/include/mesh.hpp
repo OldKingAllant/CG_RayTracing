@@ -1,6 +1,7 @@
 #pragma once
 
 #include "hit_record.hpp"
+#include "hittable.hpp"
 #include "material.hpp"
 #include "ray.hpp"
 #include "vec3.hpp"
@@ -10,6 +11,7 @@
 #include <fstream>
 #include <hittable.hpp>
 #include <ranges>
+#include <iostream>
 
 #include <optional>
 #include <vector>
@@ -23,10 +25,11 @@ class Mesh : public Hittable {
     std::vector<std::array<float, 2>> m_face_uv;
     std::vector<std::array<size_t, 3>> m_indices;
 
+    math::Vec3 m_center;
+
     bool m_smooth_shading;
 
-    Mesh(cg_raytracing::math::Vec3 _center, std::filesystem::path _path,
-         Material _material);
+    Mesh(cg_raytracing::math::Vec3 _center, Material _material);
 
     std::optional<HitRecord> Hit(const cg_raytracing::math::Ray &_ray,
                                  float _t_min = TMIN,

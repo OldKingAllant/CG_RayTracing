@@ -26,4 +26,7 @@ set_property(TARGET UnitTests PROPERTY CXX_STANDARD 23)
 
 include(CTest)
 include(Catch)
-catch_discover_tests(UnitTests)
+# catch_discover_tests(UnitTests)
+catch_discover_tests(UnitTests
+    PROPERTIES WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+)

@@ -1,13 +1,22 @@
 #include "mesh.hpp"
-#include "vec3.hpp"
-#include <algorithm>
-#include <ranges>
-#include <string>
-#include <string_view>
-#include <vector>
+
+namespace cg_raytracing::geometry {
+
+Mesh::Mesh(cg_raytracing::math::Vec3 _center, Material _material) {
+    this->m_center = _center;
+    this->m_material = _material;
+}
+std::optional<HitRecord> Mesh::Hit(const cg_raytracing::math::Ray &_ray,
+                                   float _t_min, float _t_max) const {
+    return HitRecord();
+};
+
+BoundingBox Mesh::GetBoundingBox() const {
+    return BoundingBox();
+}
 
 std::expected<int, std::string>
-cg_raytracing::geometry::Mesh::LoadFromObj(std::filesystem::path _obj_path) {
+Mesh::LoadFromObj(std::filesystem::path _obj_path) {
     std::ifstream obj_file(_obj_path);
 
     if (!obj_file.is_open()) {
@@ -86,15 +95,16 @@ cg_raytracing::geometry::Mesh::LoadFromObj(std::filesystem::path _obj_path) {
             }
             case 5:
                 size_t count = 0;
-                for (auto triangle_index : std::views::split(part, "/")) {
+                for (auto triangle_index : std::views::split(part, '/')) {
                     std::string string_index{std::string_view(triangle_index)};
                     size_t int_index = std::stoi(string_index);
                     if (count == 0) {
                         this->m_indices.push_back(std::array<size_t, 3>());
                     }
+
                     this->m_indices.back()[count] = int_index;
 
-                    count = (count + 1) % 3;
+                    count += 1;
                 }
                 break;
             }
@@ -102,3 +112,4 @@ cg_raytracing::geometry::Mesh::LoadFromObj(std::filesystem::path _obj_path) {
     }
     return 0;
 }
+} // namespace cg_raytracing::geometry
