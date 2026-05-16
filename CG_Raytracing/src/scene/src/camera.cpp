@@ -86,7 +86,6 @@ void Camera::BurstRays(cg_raytracing::scene::PointLight& light) {
         mat_cube
     );
 
-
     int hit_count = 0;
 
     for (uint32_t y = 0; y < this->m_image_height; y++) {

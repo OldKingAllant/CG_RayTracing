@@ -2,6 +2,7 @@ add_executable(UnitTests
     "./test_main.cpp"
     "./math/test_Vec3.cpp"
     "./geometry/test_obj_loader.cpp"
+    "./geometry/test_mesh.cpp"
     "geometry/test_kd_tree.cpp"
 )
 

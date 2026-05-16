@@ -4,14 +4,15 @@
 #include "hittable.hpp"
 #include "material.hpp"
 #include "ray.hpp"
+#include "triangle.hpp"
 #include "vec3.hpp"
 #include <array>
 #include <expected>
 #include <filesystem>
 #include <fstream>
 #include <hittable.hpp>
-#include <ranges>
 #include <iostream>
+#include <ranges>
 
 #include <optional>
 #include <vector>
