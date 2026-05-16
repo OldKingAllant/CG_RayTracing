@@ -66,17 +66,17 @@ namespace cg_raytracing::scene {
 	std::optional<WorldError> World::AddObject(std::shared_ptr<geometry::Hittable> _obj) {
 		auto bbox = _obj->GetBoundingBox();
 		auto half_size = m_world_size / 2.f;
-		auto is_out_of_bouns = (
-			bbox.min_x <= half_size ||
-			bbox.max_x >= half_size ||
+		auto is_out_of_bounds = (
+			std::abs(bbox.min_x) >= half_size ||
+			std::abs(bbox.max_x) >= half_size ||
 
-			bbox.min_y <= half_size ||
-			bbox.max_y >= half_size ||
+			std::abs(bbox.min_y) >= half_size ||
+			std::abs(bbox.max_y) >= half_size ||
 
-			bbox.min_z <= half_size ||
-			bbox.max_z >= half_size
+			std::abs(bbox.min_z) >= half_size ||
+			std::abs(bbox.max_z) >= half_size
 		);
-		if (is_out_of_bouns) {
+		if (is_out_of_bounds) {
 			return WorldError::OUT_OF_BOUNDS;
 		}
 		m_objects.push_back(_obj);

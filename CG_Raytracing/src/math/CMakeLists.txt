@@ -3,7 +3,8 @@ add_library(Math STATIC
     "./src/vec3.cpp"
     "./include/ray.hpp"
     "./include/vec3.hpp"
-)
+    "./include/random_prob.hpp"
+ "src/random_prob.cpp")
 
 set_property(TARGET Math PROPERTY CXX_STANDARD 23)
 
