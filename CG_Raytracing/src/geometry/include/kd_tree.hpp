@@ -28,8 +28,16 @@ namespace cg_raytracing::geometry {
 		std::optional<size_t> left, right;
 	};
 
+	enum class KDTreeMessage {
+		INVALID_OBJECT,
+		UNBALANCED
+	};
+
 	class KDTree {
 	public :
+		static constexpr size_t UNBALANCED_THRESHOLD_MIN = 7;
+		static constexpr double UNBALANCED_THRESHOLD_MULTIPLIER = 1.5;
+
 		KDTree(KDTree&& _prev) noexcept;
 		KDTree& operator=(KDTree&& _other) noexcept;
 
@@ -37,6 +45,17 @@ namespace cg_raytracing::geometry {
 
 		static std::unique_ptr<KDTree> CreateUniqueFromHittables(std::vector<std::shared_ptr<Hittable>> const& _hittables, 
 			float _world_size);
+
+		/// <summary>
+		/// NOT RECOMMENDED: Add a new hittable to
+		/// the tree in a non-balanced manner,
+		/// rebuild the tree if adding many
+		/// hittables
+		/// </summary>
+		/// <param name="_hittable">Pointer to object</param>
+		/// <param name="_hittable">Index of object in the object list</param>
+		/// <returns>If the tree is too deep wrt the number of objects</returns>
+		std::optional<KDTreeMessage> AddHittable(std::shared_ptr<Hittable> _hittable, size_t _index);
 
 		/// <summary>
 		/// Visit all nodes depth-search-first 
@@ -127,5 +146,6 @@ namespace cg_raytracing::geometry {
 	private :
 		std::vector<FlatKDNode> m_flat_tree;
 		float                   m_world_size;
+		size_t                  m_num_tracked_objects;
 	};
 }
