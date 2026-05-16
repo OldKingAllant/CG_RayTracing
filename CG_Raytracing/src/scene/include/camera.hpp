@@ -1,6 +1,6 @@
 #pragma once
 
-#include "PointLight.hpp"
+#include "point_light.hpp"
 #include "TextureFormats.hpp"
 #include "config.hpp"
 #include "ray.hpp"
@@ -8,6 +8,10 @@
 #include <array>
 #include <cstdint>
 #include <iostream>
+#include "hittable.hpp"
+#include "kd_tree.hpp"
+#include <vector>
+#include <memory>
 
 namespace cg_raytracing {
 namespace scene {
@@ -48,9 +52,11 @@ class Camera {
            const float *_direction = Config::CAMERA_DIRECTION);
 
     //void BurstRays();
+    //void BurstRays(cg_raytracing::scene::PointLight& light);
 
-    void BurstRays(cg_raytracing::scene::PointLight& light);
-
+    void BurstRays(cg_raytracing::scene::PointLight& light,
+               const cg_raytracing::geometry::KDTree* kdtree = nullptr,
+               const std::vector<std::shared_ptr<cg_raytracing::geometry::Hittable>>* hittables = nullptr);
 
     void Rotate(const math::Vec3 &_rotation_angles);
     void Translate(const math::Vec3 &_translation_vector);

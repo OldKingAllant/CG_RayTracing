@@ -1,4 +1,3 @@
-# project.ps1
 $root = "C:\Users\Utente\Desktop\CG_RayTracing"
 $build = "$root\build"
 $exeDir = "$build\bin\Debug"
