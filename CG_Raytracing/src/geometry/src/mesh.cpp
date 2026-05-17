@@ -1,7 +1,7 @@
 #include "mesh.hpp"
 #include <cstddef>
 #include <optional>
-#include <unistd.h>
+// #include <unistd.h> Exists only on POSIX/UNIX
 
 namespace cg_raytracing::geometry {
 
