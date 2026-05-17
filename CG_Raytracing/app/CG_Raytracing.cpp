@@ -9,13 +9,16 @@
 #include <triangle.hpp>
 #include <sphere.hpp>
 #include <cube.hpp>
+#include <mesh.hpp>
 #include <camera.hpp>
 #include <config.hpp>
 #include <GLContext.hpp>
 #include <IndexBuffer.hpp>
+#include <point_light.hpp>
 #include <Shader.hpp>
 #include <Texture2D.hpp>
 #include <VertexBuffer.hpp>
+
 #include <point_light.hpp>
 #include <world.hpp>
 
@@ -271,6 +274,7 @@ int main() {
     using Material = cg_raytracing::geometry::Material;
     using Sphere = cg_raytracing::geometry::Sphere;
     using Cube = cg_raytracing::geometry::Cube;
+    using Mesh = cg_raytracing::geometry::Mesh;
     using Vec3 = cg_raytracing::math::Vec3;
 
     std::vector<std::shared_ptr<Hittable>> hittables;
@@ -288,9 +292,15 @@ int main() {
 
     auto world = World::CreateEmpty(1000.f);
 
+    std::shared_ptr<Mesh> train = std::make_shared<Mesh>(Vec3(0.0f, 0.0f, 40.0f), mat_sphere);
+    // TODO: handle exception
+    auto loader_status = train->LoadFromObj("./assets/Treno.obj");
+
     world.AddObject(std::make_shared<Sphere>(Vec3(-40.0f, 0.0f, 200.0f), 30.f, mat_sphere));
     world.AddObject(std::make_shared<Cube>(Vec3(40.0f, 0.0f, 200.0f), 20.f, mat_cube));
     world.AddObject(std::make_shared<Sphere>(Vec3(0.0f, 0.0f, 250.0f), 20.f, mat_cube));
+    world.AddObject(train);
+
 
     world.UpdateTree();
 

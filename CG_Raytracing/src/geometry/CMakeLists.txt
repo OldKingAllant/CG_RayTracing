@@ -6,6 +6,7 @@ add_library(Geometry STATIC
     "src/hit_record.cpp"
     "src/kd_tree.cpp"
     "src/hittable.cpp"
+    "src/mesh.cpp"
     "include/geometry.hpp"
     "include/cube.hpp"
     "include/triangle.hpp"
@@ -13,6 +14,7 @@ add_library(Geometry STATIC
     "include/hit_record.hpp"
     "include/kd_tree.hpp"
     "include/hittable.hpp"
+    "include/mesh.hpp"
 )
 
 target_include_directories(Geometry PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")

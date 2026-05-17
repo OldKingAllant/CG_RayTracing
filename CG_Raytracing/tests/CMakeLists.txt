@@ -1,7 +1,10 @@
 add_executable(UnitTests 
     "./test_main.cpp"
     "./math/test_Vec3.cpp"
- "geometry/test_kd_tree.cpp")
+    "./geometry/test_obj_loader.cpp"
+    "./geometry/test_mesh.cpp"
+    "geometry/test_kd_tree.cpp"
+)
 
 target_link_libraries(UnitTests PRIVATE Math Geometry)
 
@@ -24,4 +27,7 @@ set_property(TARGET UnitTests PROPERTY CXX_STANDARD 23)
 
 include(CTest)
 include(Catch)
-catch_discover_tests(UnitTests)
+# catch_discover_tests(UnitTests)
+catch_discover_tests(UnitTests
+    PROPERTIES WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+)
