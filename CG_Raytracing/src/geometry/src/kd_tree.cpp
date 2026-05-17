@@ -79,12 +79,14 @@ namespace cg_raytracing::geometry {
 
 	KDTree::KDTree(KDTree&& _prev) noexcept :
 		m_flat_tree{std::move(_prev.m_flat_tree)},
-		m_world_size{_prev.m_world_size}
+		m_world_size{_prev.m_world_size},
+		m_num_tracked_objects{_prev.m_num_tracked_objects}
 	{}
 
 	KDTree& KDTree::operator=(KDTree && _other) noexcept {
 		m_flat_tree = std::move(_other.m_flat_tree);
 		m_world_size = _other.m_world_size;
+		m_num_tracked_objects = _other.m_num_tracked_objects;
 		return *this;
 	}
 
@@ -337,6 +339,9 @@ namespace cg_raytracing::geometry {
 		std::sort(code_list.begin(), code_list.end(), [](auto _l, auto _r) { return _r.second > _l.second; });
 
 		// Simple middle split between lef/right
+		// If any other method is used, it is expected that
+		// at each node, we have subtrees on both the left
+		// and right
 		auto split_middle = [](std::vector<std::pair<size_t, uint64_t>> const&, size_t _begin, size_t _end) {
 			return (_begin + _end) / 2;
 		};
@@ -349,6 +354,7 @@ namespace cg_raytracing::geometry {
 		auto kd_tree = KDTree();
 		kd_tree.m_flat_tree = std::move(flattened);
 		kd_tree.m_world_size = _world_size;
+		kd_tree.m_num_tracked_objects = _hittables.size();
 
 		return kd_tree;
 	}
@@ -580,9 +586,107 @@ namespace cg_raytracing::geometry {
 		return m_flat_tree[0].bbox;
 	}
 
+	std::optional<KDTreeMessage> KDTree::AddHittable(std::shared_ptr<Hittable> _hittable, size_t _index) {
+		if (!_hittable) {
+			return KDTreeMessage::INVALID_OBJECT;
+		}
+		auto bbox = _hittable->GetBoundingBox();
+		// Search key
+		auto morton_code = detail::ComputeMortonCode(bbox.pos.x, bbox.pos.y, bbox.pos.z, m_world_size);
+
+		size_t prev_parent{std::numeric_limits<size_t>::max()};
+		size_t curr_parent{0};
+		std::stack<size_t> bboxes_to_update{};
+		bboxes_to_update.push(curr_parent);
+
+		bool go_right = false;
+		// Follow search key until leaf node
+		while (true) {
+			auto const& node = m_flat_tree[curr_parent];
+			// Compute morton code of this node
+			auto curr_morton_code = detail::ComputeMortonCode(node.bbox.pos.x, node.bbox.pos.y, node.bbox.pos.z, m_world_size);
+
+			go_right = morton_code > curr_morton_code;
+			
+			if (node.obj_index.has_value()) {
+				// We have reached a leaf
+				break;
+			}
+
+			prev_parent = curr_parent;
+			if (go_right) {
+				curr_parent = node.right.value();
+			}
+			else {
+				curr_parent = node.left.value();
+			}
+
+			bboxes_to_update.push(curr_parent);
+		}
+
+		FlatKDNode new_node{};
+		new_node.obj_index = _index;
+		new_node.bbox = bbox;
+		new_node.left = std::nullopt;
+		new_node.right = std::nullopt;
+
+		// Append new node at the end
+		auto new_node_index = m_flat_tree.size();
+		m_flat_tree.push_back(new_node);
+
+		{
+			// Both left and right exist
+			// Since the parent node is a leaf, 
+			// move the object index to the left
+			// or the right of the new node
+			auto old_node = m_flat_tree[curr_parent];
+			auto new_old_node_index = m_flat_tree.size();
+			// Move leaf node to another position
+			m_flat_tree.push_back(old_node);
+
+			auto& parent_ref = m_flat_tree[curr_parent];
+			// Node is no longer leaf
+			parent_ref.obj_index = std::nullopt;
+
+			// Create references to new nodes
+			if (go_right) {
+				std::swap(m_flat_tree[new_node_index], m_flat_tree[new_old_node_index]);
+				std::swap(new_node_index, new_old_node_index);
+				parent_ref.left = new_old_node_index;
+				parent_ref.right = new_node_index;
+			}
+			else {
+				parent_ref.right = new_old_node_index;
+				parent_ref.left = new_node_index;
+			}
+		}
+
+		auto curr_depth = bboxes_to_update.size();
+
+		while (!bboxes_to_update.empty()) {
+			auto curr_node_index = bboxes_to_update.top();
+			bboxes_to_update.pop();
+
+			auto& node = m_flat_tree[curr_node_index];
+			node.bbox = m_flat_tree[node.left.value()].bbox.Union(m_flat_tree[node.right.value()].bbox);
+		}
+
+		m_num_tracked_objects++;
+
+		if (curr_depth < UNBALANCED_THRESHOLD_MIN) {
+			return std::nullopt;
+		}
+
+		auto expected_levels = std::ceilf(std::log2f((float)m_num_tracked_objects)) + 1;
+		auto max_depth = expected_levels * UNBALANCED_THRESHOLD_MULTIPLIER;
+
+		return (curr_depth >= max_depth) ? std::optional{ KDTreeMessage::UNBALANCED } : std::nullopt;
+	}
+
 	KDTree::KDTree() :
 		m_flat_tree{},
-		m_world_size{} {}
+		m_world_size{},
+		m_num_tracked_objects{} {}
 
 	KDNode::KDNode() :
 		bbox{},

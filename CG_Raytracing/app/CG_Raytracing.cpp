@@ -32,6 +32,7 @@
 #include <iostream>
 #include <memory>
 #include <print>
+#include <chrono>
 
 void DebugCallback(GLenum source, GLenum type, GLuint id, GLenum severity,
                    GLsizei length, const GLchar *message,
@@ -294,7 +295,7 @@ int main() {
 
     std::shared_ptr<Mesh> train = std::make_shared<Mesh>(Vec3(0.0f, 0.0f, 40.0f), mat_sphere);
     // TODO: handle exception
-    auto loader_status = train->LoadFromObj("./assets/Treno.obj");
+    auto loader_status = train->LoadFromObj("./assets/meshes/Treno.obj");
 
     world.AddObject(std::make_shared<Sphere>(Vec3(-40.0f, 0.0f, 200.0f), 30.f, mat_sphere));
     world.AddObject(std::make_shared<Cube>(Vec3(40.0f, 0.0f, 200.0f), 20.f, mat_cube));
@@ -304,7 +305,13 @@ int main() {
 
     world.UpdateTree();
 
+    auto begin = std::chrono::system_clock::now();
+
     my_camera->BurstRays(light, world);
+
+    auto end = std::chrono::system_clock::now();
+    auto diff = std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count();
+    std::println(std::cout, "Took {} ms", (double)diff / 1e3);
 
 
     tex.CopyFromBuffer(my_camera->m_img_buf.data(), 0, 0, 0, tex.GetWidth(),
