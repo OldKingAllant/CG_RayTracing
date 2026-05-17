@@ -39,7 +39,7 @@ namespace cg_raytracing::geometry {
     }
     
     BoundingBox Sphere::GetBoundingBox() const {
-        return BoundingBox::Create(m_center, m_radius, m_radius, m_radius);
+        return BoundingBox::Create(m_center, m_radius*2.f, m_radius*2.f, m_radius*2.f);
     }
 
 } // namespace cg_raytracing::geometry

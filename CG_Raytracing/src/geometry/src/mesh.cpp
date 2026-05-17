@@ -1,5 +1,6 @@
 #include "mesh.hpp"
 #include <cstddef>
+#include <optional>
 #include <unistd.h>
 
 namespace cg_raytracing::geometry {
@@ -11,26 +12,20 @@ Mesh::Mesh(cg_raytracing::math::Vec3 _center, Material _material) {
 std::optional<HitRecord> Mesh::Hit(const cg_raytracing::math::Ray &_ray,
                                    float _t_min, float _t_max) const {
     using Triangle = cg_raytracing::geometry::Triangle;
-    std::optional<HitRecord> closest_hit = std::nullopt;
+    std::optional<HitRecord> closest_hit;
     float closest_hit_distance = _t_max;
 
     for (auto triangle : this->m_indices | std::views::chunk(3)) {
 
-        Triangle current_triangle(m_vertex_positions[triangle[0][0]],
-                                  m_vertex_positions[triangle[0][1]],
-                                  m_vertex_positions[triangle[0][2]],
+        Triangle current_triangle(m_vertex_positions[triangle[0][0] - 1] + this->m_center,
+                                  m_vertex_positions[triangle[1][0] - 1] + this->m_center,
+                                  m_vertex_positions[triangle[2][0] - 1] + this->m_center,
                                   &this->m_material);
 
-        auto hit_result = current_triangle.Hit(_ray, _t_min, _t_max);
-        if (hit_result.has_value()) {
-            if (hit_result->m_t < closest_hit_distance) {
-                closest_hit_distance = hit_result->m_t;
-                // TODO: this could be replaced with an operand override
-                closest_hit->m_t = hit_result->m_t;
-                closest_hit->m_point = hit_result->m_point;
-                closest_hit->m_normal = hit_result->m_normal;
-                closest_hit->m_material = hit_result->m_material;
-            }
+        auto hit_result = current_triangle.Hit(_ray, _t_min, closest_hit_distance);
+        if (hit_result) {
+            closest_hit = hit_result;
+            closest_hit_distance = hit_result->m_t;
         }
     }
     return closest_hit;

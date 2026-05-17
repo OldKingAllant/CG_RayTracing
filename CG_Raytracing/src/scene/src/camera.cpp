@@ -5,7 +5,7 @@
 #include "sphere.hpp"
 #include "triangle.hpp"
 #include "vec3.hpp"
-#include "PointLight.hpp"
+#include "point_light.hpp"
 #include <algorithm>
 
 
@@ -64,28 +64,7 @@ void Camera::Translate(const math::Vec3 &_translation_vector) {
     }
 }
 
-void Camera::BurstRays(cg_raytracing::scene::PointLight& light) {
-
-    // Materials
-    geometry::Material mat_sphere =
-        geometry::Material::Diffuse({0.7f, 0.2f, 0.2f});
-
-    geometry::Material mat_cube =
-        geometry::Material::Metal({0.2f, 0.2f, 0.8f}, 0.5f);
-
-    // Scene objects
-    geometry::Sphere sphere(
-        math::Vec3(-40.0f, 0.0f, 200.0f),
-        30.0f,
-        mat_sphere
-    );
-
-    geometry::Cube cube(
-        math::Vec3(40.0f, 0.0f, 200.0f),
-        20.0f,
-        mat_cube
-    );
-
+void Camera::BurstRays(PointLight& _light, World const& _world) {
     int hit_count = 0;
 
     for (uint32_t y = 0; y < this->m_image_height; y++) {
@@ -100,27 +79,9 @@ void Camera::BurstRays(cg_raytracing::scene::PointLight& light) {
                     y * this->m_image_width + x
                 ];
 
-            // Intersections
-            auto hit_sphere = sphere.Hit(ray);
-            auto hit_cube   = cube.Hit(ray);
+            std::optional<geometry::HitRecord> hit{};
 
-            std::optional<geometry::HitRecord> hit;
-
-            if (hit_sphere && hit_cube) {
-
-                hit =
-                    (hit_sphere->m_t < hit_cube->m_t)
-                    ? hit_sphere
-                    : hit_cube;
-
-            } else if (hit_sphere) {
-
-                hit = hit_sphere;
-
-            } else if (hit_cube) {
-
-                hit = hit_cube;
-            }
+            hit = _world.Hit(ray);
 
             // Shading
             if (hit) {
@@ -129,7 +90,7 @@ void Camera::BurstRays(cg_raytracing::scene::PointLight& light) {
 
                 // Direction from surface point to light
                 math::Vec3 light_dir =
-                    (light.m_position - hit->m_point).normalized();
+                    (_light.m_position - hit->m_point).normalized();
 
                 // Lambert diffuse shading
                 float diffuse =
@@ -141,9 +102,9 @@ void Camera::BurstRays(cg_raytracing::scene::PointLight& light) {
                 // Final color
                 math::Vec3 color =
                     hit->m_material->m_albedo *
-                    light.m_color *
+                    _light.m_color *
                     diffuse *
-                    light.m_intensity;
+                    _light.m_intensity;
 
                 // Clamp to [0,1]
                 color.x = std::clamp(color.x, 0.0f, 1.0f);
@@ -179,30 +140,32 @@ void Camera::BurstRays(cg_raytracing::scene::PointLight& light) {
         }
     }
 
+    // 
+
     // Debug stats
-    int hit_sphere_count = 0;
-    int hit_cube_count   = 0;
-
-    for (uint32_t y = 0; y < this->m_image_height; y++) {
-
-        for (uint32_t x = 0; x < this->m_image_width; x++) {
-
-            const math::Ray& ray =
-                this->m_rays_matrix[
-                    y * this->m_image_width + x
-                ];
-
-            if (sphere.Hit(ray))
-                hit_sphere_count++;
-
-            if (cube.Hit(ray))
-                hit_cube_count++;
-        }
-    }
-
-    std::println(std::cout, "Total hits: {}", hit_count);
-    std::println(std::cout, "Sphere hits: {}", hit_sphere_count);
-    std::println(std::cout, "Cube hits: {}", hit_cube_count);
+    // int hit_sphere_count = 0;
+    // int hit_cube_count   = 0;
+    // 
+    // for (uint32_t y = 0; y < this->m_image_height; y++) {
+    // 
+    //     for (uint32_t x = 0; x < this->m_image_width; x++) {
+    // 
+    //         const math::Ray& ray =
+    //             this->m_rays_matrix[
+    //                 y * this->m_image_width + x
+    //             ];
+    // 
+    //         if (sphere.Hit(ray))
+    //             hit_sphere_count++;
+    // 
+    //         if (cube.Hit(ray))
+    //             hit_cube_count++;
+    //     }
+    // }
+    // 
+    // std::println(std::cout, "Total hits: {}", hit_count);
+    // std::println(std::cout, "Sphere hits: {}", hit_sphere_count);
+    // std::println(std::cout, "Cube hits: {}", hit_cube_count);
 }
 
 /*

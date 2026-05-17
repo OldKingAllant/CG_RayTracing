@@ -1,7 +1,7 @@
 add_library(Scene STATIC
     "src/camera.cpp"
     "include/camera.hpp"
-    "include/PointLight.hpp"
+    "include/point_light.hpp"
     "include/world.hpp"
  "src/world.cpp")
 

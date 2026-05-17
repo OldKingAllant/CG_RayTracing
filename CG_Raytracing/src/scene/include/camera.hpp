@@ -1,13 +1,19 @@
 #pragma once
 
-#include "PointLight.hpp"
+#include "point_light.hpp"
 #include "TextureFormats.hpp"
 #include "config.hpp"
 #include "ray.hpp"
 #include "vec3.hpp"
+#include "hittable.hpp"
+#include "kd_tree.hpp"
+#include "world.hpp"
+
 #include <array>
 #include <cstdint>
 #include <iostream>
+#include <vector>
+#include <memory>
 
 namespace cg_raytracing {
 namespace scene {
@@ -48,9 +54,10 @@ class Camera {
            const float *_direction = Config::CAMERA_DIRECTION);
 
     //void BurstRays();
+    //void BurstRays(cg_raytracing::scene::PointLight& light);
 
-    void BurstRays(cg_raytracing::scene::PointLight& light);
-
+    void BurstRays(PointLight& _light, 
+        World const& _world);
 
     void Rotate(const math::Vec3 &_rotation_angles);
     void Translate(const math::Vec3 &_translation_vector);
