@@ -63,6 +63,25 @@ struct Vertex2D {
     }
 };
 
+struct CameraPreset {
+    cg_raytracing::math::Vec3 m_position;
+    cg_raytracing::math::Vec3 m_direction;
+};
+
+const CameraPreset CAMERA_PRESETS[] = {
+    {
+        {0.0f, 0.0f, 0.0f},
+        {0.0f, 0.0f, 0.0f}
+    },
+    {
+        {10.0f, 10.0f, -15.0f},
+        {0.0f, -0.15f, 0.0f}
+    },
+    {
+        {-10.0f, -10.0f, 15.0f},
+        {0.0f, 0.15f, 0.0f}
+    }
+};
 // function to move the camera around. Probably in the future is better to move
 // this in another file and optimize it
 void HandleKeyDown(SDL_Event &_ev,
@@ -106,6 +125,23 @@ void HandleKeyDown(SDL_Event &_ev,
         _light.m_position.x -= 50.0f;
         must_update = true;
         break;
+    case SDL_SCANCODE_C: {
+        static int s_current_preset = 0;
+        s_current_preset = (s_current_preset + 1) % 3;
+
+        const auto& preset = CAMERA_PRESETS[s_current_preset];
+        float pos[3] = { preset.m_position.x, preset.m_position.y, preset.m_position.z };
+        float dir[3] = { preset.m_direction.x, preset.m_direction.y, preset.m_direction.z };
+
+        *_my_camera = cg_raytracing::scene::Camera(
+            Config::SENSOR_SIZE_WIDTH, Config::FOCAL_LENGTH,
+            Config::IMAGE_WIDTH, Config::IMAGE_HEIGHT,
+            pos, dir
+        );
+        must_update = true;
+        break;
+    } // don't remove, may cause errors due to variable declaration in switch
+    
     default:
         break;
     }
@@ -295,7 +331,7 @@ int main() {
 
     std::shared_ptr<Mesh> train = std::make_shared<Mesh>(Vec3(0.0f, 0.0f, 40.0f), mat_sphere);
     // TODO: handle exception
-    auto loader_status = train->LoadFromObj("./assets/meshes/Treno.obj");
+    //auto loader_status = train->LoadFromObj("./assets/meshes/Treno.obj");
 
     world.AddObject(std::make_shared<Sphere>(Vec3(-40.0f, 0.0f, 200.0f), 30.f, mat_sphere));
     world.AddObject(std::make_shared<Cube>(Vec3(40.0f, 0.0f, 200.0f), 20.f, mat_cube));
