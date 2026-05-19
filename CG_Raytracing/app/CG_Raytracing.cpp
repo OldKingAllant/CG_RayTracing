@@ -308,7 +308,7 @@ int main() {
 
     using Hittable = cg_raytracing::geometry::Hittable;
     using World = cg_raytracing::scene::World;
-    using Material = cg_raytracing::geometry::Material;
+    using StandardMaterial = cg_raytracing::geometry::StandardMaterial;
     using Sphere = cg_raytracing::geometry::Sphere;
     using Cube = cg_raytracing::geometry::Cube;
     using Mesh = cg_raytracing::geometry::Mesh;
@@ -321,15 +321,20 @@ int main() {
     // che implementi i metodi richiesti
     // hittables = ObjLoader::Load("model.obj", &mat);
 
-    Material mat_sphere =
-        Material::Diffuse({ 0.7f, 0.2f, 0.2f });
-
-    Material mat_cube =
-        Material::Metal({ 0.2f, 0.2f, 0.8f }, 0.5f);
+    auto mat_sphere = std::make_shared<StandardMaterial>(
+    StandardMaterial::Diffuse({0.7f, 0.2f, 0.2f})
+    );
+    auto mat_cube = std::make_shared<StandardMaterial>(
+        StandardMaterial::Metal({0.2f, 0.2f, 0.8f}, 0.5f)
+    );
+    auto mat_train = std::make_shared<StandardMaterial>(
+        StandardMaterial::Diffuse({0.7f, 0.2f, 0.2f})
+    );
 
     auto world = World::CreateEmpty(1000.f);
 
-    std::shared_ptr<Mesh> train = std::make_shared<Mesh>(Vec3(0.0f, 0.0f, 40.0f), mat_sphere);
+    auto mat_train = std::make_shared<StandardMaterial>(StandardMaterial::Diffuse({0.7f, 0.2f, 0.2f}));
+    std::shared_ptr<Mesh> train = std::make_shared<Mesh>(Vec3(0.0f, 0.0f, 40.0f), mat_train);
     // TODO: handle exception
     //auto loader_status = train->LoadFromObj("./assets/meshes/Treno.obj");
 
@@ -337,7 +342,6 @@ int main() {
     world.AddObject(std::make_shared<Cube>(Vec3(40.0f, 0.0f, 200.0f), 20.f, mat_cube));
     world.AddObject(std::make_shared<Sphere>(Vec3(0.0f, 0.0f, 250.0f), 20.f, mat_cube));
     world.AddObject(train);
-
 
     world.UpdateTree();
 

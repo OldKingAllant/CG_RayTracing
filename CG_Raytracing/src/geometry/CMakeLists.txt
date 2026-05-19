@@ -15,6 +15,7 @@ add_library(Geometry STATIC
     "include/kd_tree.hpp"
     "include/hittable.hpp"
     "include/mesh.hpp"
+    "src/material.cpp"
 )
 
 target_include_directories(Geometry PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")

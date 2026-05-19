@@ -1,12 +1,13 @@
 #pragma once
 
-#include "material.hpp"
+//#include "material.hpp" // Forward declaration to avoid circular dependency with material.hpp
 #include "ray.hpp"
 #include "vec3.hpp"
 
 namespace cg_raytracing::geometry {
 
 struct HitRecord {
+    struct Material; // Forward declaration to avoid circular dependency with material.hpp
     cg_raytracing::math::Vec3 m_point;
     cg_raytracing::math::Vec3 m_normal;
     const Material*           m_material;
