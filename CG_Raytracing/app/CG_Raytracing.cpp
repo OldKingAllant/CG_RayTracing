@@ -333,7 +333,6 @@ int main() {
 
     auto world = World::CreateEmpty(1000.f);
 
-    auto mat_train = std::make_shared<StandardMaterial>(StandardMaterial::Diffuse({0.7f, 0.2f, 0.2f}));
     std::shared_ptr<Mesh> train = std::make_shared<Mesh>(Vec3(0.0f, 0.0f, 40.0f), mat_train);
     // TODO: handle exception
     //auto loader_status = train->LoadFromObj("./assets/meshes/Treno.obj");

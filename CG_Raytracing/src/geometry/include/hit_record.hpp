@@ -6,8 +6,9 @@
 
 namespace cg_raytracing::geometry {
 
+struct Material; // Forward declaration to avoid circular dependency with material.hpp
+
 struct HitRecord {
-    struct Material; // Forward declaration to avoid circular dependency with material.hpp
     cg_raytracing::math::Vec3 m_point;
     cg_raytracing::math::Vec3 m_normal;
     const Material*           m_material;

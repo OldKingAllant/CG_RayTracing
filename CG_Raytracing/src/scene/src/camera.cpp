@@ -87,7 +87,8 @@ void Camera::BurstRays(PointLight& _light, World const& _world) {
             if (hit) {
 
                 hit_count++;
-
+                
+                /*
                 // Direction from surface point to light
                 math::Vec3 light_dir =
                     (_light.m_position - hit->m_point).normalized();
@@ -98,13 +99,16 @@ void Camera::BurstRays(PointLight& _light, World const& _world) {
                         hit->m_normal.dot(light_dir),
                         0.0f
                     );
+                */
 
                 // Final color
-                math::Vec3 color =
-                    hit->m_material->m_albedo *
-                    _light.m_color *
-                    diffuse *
-                    _light.m_intensity;
+                math::Vec3 color = hit->m_material->Shade(
+                    *hit,
+                    _light.m_position,
+                    _light.m_color,
+                    _light.m_intensity,
+                    ray
+                );
 
                 // Clamp to [0,1]
                 color.x = std::clamp(color.x, 0.0f, 1.0f);
